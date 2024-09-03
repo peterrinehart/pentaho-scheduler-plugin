@@ -42,7 +42,11 @@ public abstract class JobTrigger implements Serializable, IJobTrigger {
 
   public static final SimpleJobTrigger ONCE_NOW = new SimpleJobTrigger( new Date(), null, 0, 0L );
 
-  private Date startTime;
+  private int startHour;
+  private int startMin;
+  private int startYear;
+  private int startMonth;
+  private int startDay;
 
   private Date endTime;
 
@@ -57,19 +61,54 @@ public abstract class JobTrigger implements Serializable, IJobTrigger {
   public JobTrigger() {
   }
 
-  public JobTrigger( Date startTime, Date endTime ) {
-    this.startTime = startTime;
+  public JobTrigger( int startHour, int startMin, int startYear, int startMonth, int startDay, Date endTime ) {
+    this.startHour = startHour;
+    this.startMin = startMin;
+    this.startYear = startYear;
+    this.startMonth = startMonth;
+    this.startDay = startDay;
     this.endTime = endTime;
   }
 
   @Override
-  public Date getStartTime() {
-    return startTime;
+  public int getStartHour() {
+    return startHour;
   }
 
-  @Override
-  public void setStartTime( Date startTime ) {
-    this.startTime = startTime;
+  public void setStartHour( int startHour ) {
+    this.startHour = startHour;
+  }
+
+  public int getStartMin() {
+    return startMin;
+  }
+
+  public void setStartMin( int startMin ) {
+    this.startMin = startMin;
+  }
+
+  public int getStartYear() {
+    return startYear;
+  }
+
+  public void setStartYear( int startYear ) {
+    this.startYear = startYear;
+  }
+
+  public int getStartMonth() {
+    return startMonth;
+  }
+
+  public void setStartMonth( int startMonth ) {
+    this.startMonth = startMonth;
+  }
+
+  public int getStartDay() {
+    return startDay;
+  }
+
+  public void setStartDay( int startDay ) {
+    this.startDay = startDay;
   }
 
   @Override

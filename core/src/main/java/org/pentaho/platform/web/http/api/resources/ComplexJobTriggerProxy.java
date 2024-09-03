@@ -32,7 +32,11 @@ public class ComplexJobTriggerProxy {
   int[] monthsOfYear = new int[0];
   int[] years = new int[0];
 
-  Date startTime;
+  int startHour;
+  int startMin;
+  int startYear;
+  int startMonth;
+  int startDay;
   Date endTime;
   String uiPassParam;
   String cronString;
@@ -46,12 +50,44 @@ public class ComplexJobTriggerProxy {
     this.repeatInterval = repeatIntervalSeconds;
   }
 
-  public Date getStartTime() {
-    return startTime;
+  public int getStartHour() {
+    return startHour;
   }
 
-  public void setStartTime( Date startTime ) {
-    this.startTime = startTime;
+  public void setStartHour( int startHour ) {
+    this.startHour = startHour;
+  }
+
+  public int getStartMin() {
+    return startMin;
+  }
+
+  public void setStartMin( int startMin ) {
+    this.startMin = startMin;
+  }
+
+  public int getStartYear() {
+    return startYear;
+  }
+
+  public void setStartYear( int startYear ) {
+    this.startYear = startYear;
+  }
+
+  public int getStartMonth() {
+    return startMonth;
+  }
+
+  public void setStartMonth( int startMonth ) {
+    this.startMonth = startMonth;
+  }
+
+  public int getStartDay() {
+    return startDay;
+  }
+
+  public void setStartDay( int startDay ) {
+    this.startDay = startDay;
   }
 
   public Date getEndTime() {

@@ -609,7 +609,7 @@ public class ScheduleRecurrenceDialog extends AbstractWizardDialog {
     int startYear = startDate.getYear();
     int startMonth = startDate.getMonth();
     int startDay = startDate.getDate();
-    Date startDateTime = new Date( startYear, startMonth, startDay, startHour, startMin );
+    //Date startDateTime = new Date( startYear, startMonth, startDay, startHour, startMin );
 
     Date endDate = scheduleEditorWizardPanel.getEndDate();
     MonthOfYear monthOfYear = scheduleEditor.getRecurrenceEditor().getSelectedMonth();
