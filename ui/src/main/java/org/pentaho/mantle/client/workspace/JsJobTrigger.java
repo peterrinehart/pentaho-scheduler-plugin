@@ -682,5 +682,9 @@ public class JsJobTrigger extends JavaScriptObject {
 
   public final native String getLogLevel() /*-{ return this.logLevel; }-*/;
 
-  public final native void setLogLevel(  boolean logLevel) /*-{ this.logLevel = logLevel; }-*/;
+  public final native void setLogLevel( boolean logLevel ) /*-{ this.logLevel = logLevel; }-*/;
+
+  public final native String getTimeZone() /*-{ return this.timeZone; }-*/;
+
+  public final native void setTimeZone( String timeZone ) /*-{ this.timeZone = timeZone; }-*/;
 }

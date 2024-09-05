@@ -102,7 +102,6 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 
 import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
-import static org.quartz.TriggerBuilder.newTrigger;
 
 /**
  * A Quartz implementation of {@link IScheduler}
@@ -242,17 +241,31 @@ public class QuartzScheduler implements IScheduler {
     MutableTrigger quartzTrigger = null;
     if ( jobTrigger instanceof ComplexJobTrigger ) {
       try {
+        TimeZone tz = TimeZone.getTimeZone( jobTrigger.getTimeZone() );
+        java.util.Calendar startDateCal = java.util.Calendar.getInstance();
+        startDateCal.setTimeZone( tz );
+        startDateCal.set( jobTrigger.getStartYear(), jobTrigger.getStartMonth(), jobTrigger.getStartDay() );
+        startDateCal.set( java.util.Calendar.AM_PM, jobTrigger.getStartAmPm() == 0 ? java.util.Calendar.AM : java.util.Calendar.PM );
+        startDateCal.set( java.util.Calendar.HOUR_OF_DAY, jobTrigger.getStartHour() );
+        startDateCal.set( java.util.Calendar.MINUTE, jobTrigger.getStartMin() );
+
         CronTriggerImpl cronTrigger = new CronTriggerImpl();
         cronTrigger.setName( jobId.toString() );
         cronTrigger.setGroup( jobId.getUserName() );
         cronTrigger.setCronExpression( jobTrigger.getCronString() != null ? jobTrigger.getCronString() :
           QuartzCronStringFactory.createCronString( (ComplexJobTrigger) jobTrigger ) );
+        cronTrigger.setTimeZone( tz );
+        cronTrigger.setStartTime( Date.from( startDateCal.toInstant() ) );
+        if ( jobTrigger.getEndTime() != null ) {
+          cronTrigger.setEndTime( jobTrigger.getEndTime() );
+        }
         quartzTrigger = cronTrigger;
       } catch ( ParseException e ) {
         throw new SchedulerException( Messages.getInstance().getString(
           "QuartzScheduler.ERROR_0001_FAILED_TO_SCHEDULE_JOB", jobId.getJobName() ), e );
       }
     } else if ( jobTrigger instanceof SimpleJobTrigger ) {
+      // UIs will no longer create simple triggers, but we need to keep this for handling old exports and existing installs
       try {
         SimpleJobTrigger simpleTrigger = (SimpleJobTrigger) jobTrigger;
         long interval = simpleTrigger.getRepeatInterval();
@@ -299,7 +312,7 @@ public class QuartzScheduler implements IScheduler {
 
   private Calendar createQuartzCalendar( ComplexJobTrigger complexJobTrigger ) {
     Calendar triggerCalendar = null;
-    if ( ( complexJobTrigger.getStartTime() != null ) || ( complexJobTrigger.getEndTime() != null ) ) {
+    if ( ( complexJobTrigger.getStartDay() != null ) || ( complexJobTrigger.getEndTime() != null ) ) {
       triggerCalendar =
         new QuartzSchedulerAvailability( complexJobTrigger.getStartTime(), complexJobTrigger.getEndTime() );
     }

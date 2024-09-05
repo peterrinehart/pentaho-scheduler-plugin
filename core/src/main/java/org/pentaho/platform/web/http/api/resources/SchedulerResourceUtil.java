@@ -145,7 +145,12 @@ public class SchedulerResourceUtil {
         complexJobTrigger.addMinuteRecurrence( calendar.get( Calendar.MINUTE ) );
       }
 
-      complexJobTrigger.setStartTime( proxyTrigger.getStartTime() );
+      complexJobTrigger.setStartHour( proxyTrigger.getStartHour() );
+      complexJobTrigger.setStartMin( proxyTrigger.getStartMin() );
+      complexJobTrigger.setStartYear( proxyTrigger.getStartYear() );
+      complexJobTrigger.setStartMonth( proxyTrigger.getStartMonth() );
+      complexJobTrigger.setStartDay( proxyTrigger.getStartDay() );
+
       complexJobTrigger.setEndTime( proxyTrigger.getEndTime() );
       complexJobTrigger.setDuration( scheduleRequest.getDuration() );
       complexJobTrigger.setUiPassParam( scheduleRequest.getComplexJobTrigger().getUiPassParam() );
@@ -161,7 +166,12 @@ public class SchedulerResourceUtil {
           cronString += " *";
         }
         IComplexJobTrigger complexJobTrigger = scheduler.createComplexTrigger( cronString );
-        complexJobTrigger.setStartTime( scheduleRequest.getCronJobTrigger().getStartTime() );
+        complexJobTrigger.setStartHour( scheduleRequest.getCronJobTrigger().getStartHour() );
+        complexJobTrigger.setStartMin( scheduleRequest.getCronJobTrigger().getStartMin() );
+        complexJobTrigger.setStartYear( scheduleRequest.getCronJobTrigger().getStartYear() );
+        complexJobTrigger.setStartMonth( scheduleRequest.getCronJobTrigger().getStartMonth() );
+        complexJobTrigger.setStartDay( scheduleRequest.getCronJobTrigger().getStartDay() );
+
         complexJobTrigger.setEndTime( scheduleRequest.getCronJobTrigger().getEndTime() );
         complexJobTrigger.setDuration( scheduleRequest.getCronJobTrigger().getDuration() );
         complexJobTrigger.setUiPassParam( scheduleRequest.getCronJobTrigger().getUiPassParam() );

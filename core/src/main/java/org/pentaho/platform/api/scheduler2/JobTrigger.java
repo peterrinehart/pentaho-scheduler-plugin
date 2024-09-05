@@ -40,13 +40,13 @@ public abstract class JobTrigger implements Serializable, IJobTrigger {
    */
   private static final long serialVersionUID = -2110414852036623140L;
 
-  public static final SimpleJobTrigger ONCE_NOW = new SimpleJobTrigger( new Date(), null, 0, 0L );
-
   private int startHour;
   private int startMin;
   private int startYear;
   private int startMonth;
   private int startDay;
+  private int startAmPm;
+
 
   private Date endTime;
 
@@ -57,6 +57,8 @@ public abstract class JobTrigger implements Serializable, IJobTrigger {
   private String cronDescription;
 
   private long duration = -1;
+
+  private String timeZone = "";
 
   public JobTrigger() {
   }
@@ -159,4 +161,25 @@ public abstract class JobTrigger implements Serializable, IJobTrigger {
   public void setCronDescription(String cronDescription) {
     this.cronDescription = cronDescription;
   }
+
+  @Override
+  public String getTimeZone() {
+    return timeZone;
+  }
+
+  @Override
+  public void setTimeZone( String timeZone ) {
+    this.timeZone = timeZone;
+  }
+
+  @Override
+  public void setStartAmPm( int startAmPm ) {
+    this.startAmPm = startAmPm;
+  }
+
+  @Override
+  int getStartAmPm() {
+    return this.startAmPm;
+  }
+
 }

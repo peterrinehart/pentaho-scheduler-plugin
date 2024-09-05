@@ -609,7 +609,7 @@ public class ScheduleRecurrenceDialog extends AbstractWizardDialog {
     int startYear = startDate.getYear();
     int startMonth = startDate.getMonth();
     int startDay = startDate.getDate();
-    //Date startDateTime = new Date( startYear, startMonth, startDay, startHour, startMin );
+    Date startDateTime = new Date( startYear, startMonth, startDay, startHour, startMin );
 
     Date endDate = scheduleEditorWizardPanel.getEndDate();
     MonthOfYear monthOfYear = scheduleEditor.getRecurrenceEditor().getSelectedMonth();
@@ -629,6 +629,7 @@ public class ScheduleRecurrenceDialog extends AbstractWizardDialog {
       jsJobTrigger.setRepeatInterval( 0 );
       jsJobTrigger.setRepeatCount( 0 );
       jsJobTrigger.setNativeStartTime( DateTimeFormat.getFormat( PredefinedFormat.ISO_8601 ).format( startDateTime ) );
+      jsJobTrigger.setTimeZone( scheduleEditorWizardPanel.getTimeZone() );
     } else if ( ( scheduleType == ScheduleType.SECONDS ) || ( scheduleType == ScheduleType.MINUTES )
       || ( scheduleType == ScheduleType.HOURS ) ) {
       int repeatInterval = 0;
@@ -644,6 +645,7 @@ public class ScheduleRecurrenceDialog extends AbstractWizardDialog {
       if ( endDate != null ) {
         jsJobTrigger.setNativeEndTime( DateTimeFormat.getFormat( PredefinedFormat.ISO_8601 ).format( endDate ) );
       }
+      jsJobTrigger.setTimeZone( scheduleEditorWizardPanel.getTimeZone() );
     } else if ( scheduleType == ScheduleType.DAILY ) {
       if ( scheduleEditor.getRecurrenceEditor().isEveryNDays() && !scheduleEditor.getRecurrenceEditor().shouldIgnoreDst()) {
         int repeatInterval = 0;
@@ -697,6 +699,7 @@ public class ScheduleRecurrenceDialog extends AbstractWizardDialog {
           jsJobTrigger.setNativeEndTime( DateTimeFormat.getFormat( PredefinedFormat.ISO_8601 ).format( endDate ) );
         }
       }
+      jsJobTrigger.setTimeZone( scheduleEditorWizardPanel.getTimeZone() );
     } else if ( scheduleType == ScheduleType.CRON ) { // Cron jobs
       jsJobTrigger.setType( "cronJobTrigger" ); //$NON-NLS-1$
     } else if ( ( scheduleType == ScheduleType.WEEKLY ) && ( daysOfWeek.size() > 0 ) ) {
@@ -721,6 +724,7 @@ public class ScheduleRecurrenceDialog extends AbstractWizardDialog {
       if ( endDate != null ) {
         jsJobTrigger.setNativeEndTime( DateTimeFormat.getFormat( PredefinedFormat.ISO_8601 ).format( endDate ) );
       }
+      jsJobTrigger.setTimeZone( scheduleEditorWizardPanel.getTimeZone() );
     } else if ( ( scheduleType == ScheduleType.MONTHLY )
       || ( ( scheduleType == ScheduleType.YEARLY ) && ( monthOfYear != null ) ) ) {
       jsJobTrigger.setType( "complexJobTrigger" ); //$NON-NLS-1$
@@ -780,6 +784,7 @@ public class ScheduleRecurrenceDialog extends AbstractWizardDialog {
           jsJobTrigger.setNativeEndTime( DateTimeFormat.getFormat( PredefinedFormat.ISO_8601 ).format( endDate ) );
         }
       }
+      jsJobTrigger.setTimeZone( scheduleEditorWizardPanel.getTimeZone() );
     }
     return jsJobTrigger;
   }
