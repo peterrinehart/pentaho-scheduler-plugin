@@ -32,6 +32,8 @@ public class ComplexJobTriggerProxy {
   int[] monthsOfYear = new int[0];
   int[] years = new int[0];
 
+  Date startTime;
+
   int startHour;
   int startMin;
   int startYear;
@@ -48,6 +50,14 @@ public class ComplexJobTriggerProxy {
   }
   public void setRepeatInterval( long repeatIntervalSeconds ) {
     this.repeatInterval = repeatIntervalSeconds;
+  }
+
+  public Date getStartTime() {
+    return startTime;
+  }
+
+  public void setStartTime( Date startTime ) {
+    this.startTime = startTime;
   }
 
   public int getStartHour() {

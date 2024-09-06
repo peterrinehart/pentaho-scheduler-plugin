@@ -88,6 +88,14 @@ public class ComplexJobTrigger extends JobTrigger implements IComplexJobTrigger 
   private long repeatInterval = 0;
   private String cronDescription;
 
+  private int startHour = -1;
+  private int startMin = -1;
+  private int startYear = -1;
+  private int startMonth = -1;
+  private int startDay = -1;
+  private int startAmPm = -1;
+  private String timeZone;
+
   public long getRepeatInterval() {
     return repeatInterval;
   }
@@ -629,4 +637,59 @@ public class ComplexJobTrigger extends JobTrigger implements IComplexJobTrigger 
     return cronDescription;
   }
 
+  public int getStartHour() {
+    return startHour;
+  }
+
+  public void setStartHour( int startHour ) {
+    this.startHour = startHour;
+  }
+
+  public int getStartMin() {
+    return startMin;
+  }
+
+  public void setStartMin( int startMin ) {
+    this.startMin = startMin;
+  }
+
+  public int getStartYear() {
+    return startYear;
+  }
+
+  public void setStartYear( int startYear ) {
+    this.startYear = startYear;
+  }
+
+  public int getStartMonth() {
+    return startMonth;
+  }
+
+  public void setStartMonth( int startMonth ) {
+    this.startMonth = startMonth;
+  }
+
+  public int getStartDay() {
+    return startDay;
+  }
+
+  public void setStartDay( int startDay ) {
+    this.startDay = startDay;
+  }
+
+  public int getStartAmPm() {
+    return startAmPm;
+  }
+
+  public void setStartAmPm( int startAmPm ) {
+    this.startAmPm = startAmPm;
+  }
+
+  public String getTimeZone() {
+    return timeZone;
+  }
+
+  public void setTimeZone( String timeZone ) {
+    this.timeZone = timeZone;
+  }
 }

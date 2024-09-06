@@ -38,8 +38,8 @@ public class SimpleJobTrigger extends JobTrigger implements ISimpleJobTrigger {
   private int repeatCount = 0;
   private long repeatInterval = 0;
 
-  public SimpleJobTrigger( int startHour, int startMin, int startYear, int startMonth, int startDay, Date endTime, int repeatCount, long repeatIntervalSeconds ) {
-    super( startHour, startMin, startYear, startMonth, startDay, endTime );
+  public SimpleJobTrigger( Date startTime, Date endTime, int repeatCount, long repeatIntervalSeconds ) {
+    super( startTime, endTime );
     this.repeatCount = repeatCount;
     this.repeatInterval = repeatIntervalSeconds;
   }
@@ -72,20 +72,8 @@ public class SimpleJobTrigger extends JobTrigger implements ISimpleJobTrigger {
     b.append( "repeatInterval=" ); //$NON-NLS-1$
     b.append( repeatInterval );
     b.append( ", " ); //$NON-NLS-1$
-    b.append( "startHour=" ); //$NON-NLS-1$
-    b.append( super.getStartHour() );
-    b.append( ", " ); //$NON-NLS-1$
-    b.append( "startMin=" ); //$NON-NLS-1$
-    b.append( super.getStartMin() );
-    b.append( ", " ); //$NON-NLS-1$
-    b.append( "startYear=" ); //$NON-NLS-1$
-    b.append( super.getStartYear() );
-    b.append( ", " ); //$NON-NLS-1$
-    b.append( "startMonth=" ); //$NON-NLS-1$
-    b.append( super.getStartMonth() );
-    b.append( ", " ); //$NON-NLS-1$
-    b.append( "startDay=" ); //$NON-NLS-1$
-    b.append( super.getStartDay() );
+    b.append( "startTime=" ); //$NON-NLS-1$
+    b.append( super.getStartTime() );
     b.append( ", " ); //$NON-NLS-1$
     b.append( "endTime=" ); //$NON-NLS-1$
     b.append( super.getEndTime() );

@@ -241,23 +241,27 @@ public class QuartzScheduler implements IScheduler {
     MutableTrigger quartzTrigger = null;
     if ( jobTrigger instanceof ComplexJobTrigger ) {
       try {
-        TimeZone tz = TimeZone.getTimeZone( jobTrigger.getTimeZone() );
-        java.util.Calendar startDateCal = java.util.Calendar.getInstance();
-        startDateCal.setTimeZone( tz );
-        startDateCal.set( jobTrigger.getStartYear(), jobTrigger.getStartMonth(), jobTrigger.getStartDay() );
-        startDateCal.set( java.util.Calendar.AM_PM, jobTrigger.getStartAmPm() == 0 ? java.util.Calendar.AM : java.util.Calendar.PM );
-        startDateCal.set( java.util.Calendar.HOUR_OF_DAY, jobTrigger.getStartHour() );
-        startDateCal.set( java.util.Calendar.MINUTE, jobTrigger.getStartMin() );
-
+        ComplexJobTrigger complexJobTrigger = (ComplexJobTrigger) jobTrigger;
         CronTriggerImpl cronTrigger = new CronTriggerImpl();
+        java.util.Calendar startDateCal = java.util.Calendar.getInstance();
+
+        if ( complexJobTrigger.getStartHour() >= 0 ) {
+          // set time zone from PUC UI input
+          TimeZone tz = TimeZone.getTimeZone( complexJobTrigger.getTimeZone() );
+          cronTrigger.setTimeZone( tz );
+          startDateCal = getJavaCalendarFromTzTrigger( complexJobTrigger );
+          cronTrigger.setStartTime( Date.from( startDateCal.toInstant() ) );
+        } else {
+          // legacy; for handling old exports and existing installs
+          cronTrigger.setStartTime( complexJobTrigger.getStartTime() );
+        }
+
         cronTrigger.setName( jobId.toString() );
         cronTrigger.setGroup( jobId.getUserName() );
-        cronTrigger.setCronExpression( jobTrigger.getCronString() != null ? jobTrigger.getCronString() :
-          QuartzCronStringFactory.createCronString( (ComplexJobTrigger) jobTrigger ) );
-        cronTrigger.setTimeZone( tz );
-        cronTrigger.setStartTime( Date.from( startDateCal.toInstant() ) );
-        if ( jobTrigger.getEndTime() != null ) {
-          cronTrigger.setEndTime( jobTrigger.getEndTime() );
+        cronTrigger.setCronExpression( complexJobTrigger.getCronString() != null ? complexJobTrigger.getCronString() :
+          QuartzCronStringFactory.createCronString( complexJobTrigger ) );
+        if ( complexJobTrigger.getEndTime() != null ) {
+          cronTrigger.setEndTime( complexJobTrigger.getEndTime() );
         }
         quartzTrigger = cronTrigger;
       } catch ( ParseException e ) {
@@ -312,11 +316,25 @@ public class QuartzScheduler implements IScheduler {
 
   private Calendar createQuartzCalendar( ComplexJobTrigger complexJobTrigger ) {
     Calendar triggerCalendar = null;
-    if ( ( complexJobTrigger.getStartDay() != null ) || ( complexJobTrigger.getEndTime() != null ) ) {
+    if ( complexJobTrigger.getStartHour() > -1 ) {
+      java.util.Calendar startDateCal = getJavaCalendarFromTzTrigger( complexJobTrigger );
+      triggerCalendar = new QuartzSchedulerAvailability( Date.from( startDateCal.toInstant() ), complexJobTrigger.getEndTime() );
+    } else if ( ( complexJobTrigger.getStartTime() != null ) || ( complexJobTrigger.getEndTime() != null ) ) {
       triggerCalendar =
         new QuartzSchedulerAvailability( complexJobTrigger.getStartTime(), complexJobTrigger.getEndTime() );
     }
     return triggerCalendar;
+  }
+
+  private static java.util.Calendar getJavaCalendarFromTzTrigger( ComplexJobTrigger complexJobTrigger ) {
+    TimeZone tz = TimeZone.getTimeZone( complexJobTrigger.getTimeZone() );
+    java.util.Calendar startDateCal = java.util.Calendar.getInstance();
+    startDateCal.setTimeZone( tz );
+    startDateCal.set( complexJobTrigger.getStartYear(), complexJobTrigger.getStartMonth(), complexJobTrigger.getStartDay() );
+    startDateCal.set( java.util.Calendar.AM_PM, complexJobTrigger.getStartAmPm() == 0 ? java.util.Calendar.AM : java.util.Calendar.PM );
+    startDateCal.set( java.util.Calendar.HOUR_OF_DAY, complexJobTrigger.getStartHour() );
+    startDateCal.set( java.util.Calendar.MINUTE, complexJobTrigger.getStartMin() );
+    return startDateCal;
   }
 
   /**
