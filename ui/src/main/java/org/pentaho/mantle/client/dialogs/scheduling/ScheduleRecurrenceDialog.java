@@ -17,6 +17,7 @@
 
 package org.pentaho.mantle.client.dialogs.scheduling;
 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -470,6 +471,8 @@ public class ScheduleRecurrenceDialog extends AbstractWizardDialog {
     schedule.put( ScheduleParamsHelper.OVERWRITE_FILE_KEY, new JSONString( String.valueOf( overwriteFile ) ) );
 
     if ( scheduleType == ScheduleType.RUN_ONCE ) { // Run once types
+      // set end date to one minute later to ensure job ends after one run
+      endDate.setTime( startDate.getTime() + 60000l );
       schedule.put( "complexJobTrigger", getJsonComplexTriggerInterval( -1, -1, startHour, startMin, startYear, startMonth, startDay, null, enableSafeMode, gatherMetrics, logLevel ) );
     } else if ( ( scheduleType == ScheduleType.SECONDS ) || ( scheduleType == ScheduleType.MINUTES )
       || ( scheduleType == ScheduleType.HOURS ) ) {

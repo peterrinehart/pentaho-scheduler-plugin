@@ -329,11 +329,13 @@ public class QuartzScheduler implements IScheduler {
   private static java.util.Calendar getJavaCalendarFromTzTrigger( ComplexJobTrigger complexJobTrigger ) {
     TimeZone tz = TimeZone.getTimeZone( complexJobTrigger.getTimeZone() );
     java.util.Calendar startDateCal = java.util.Calendar.getInstance();
+    startDateCal.clear();
     startDateCal.setTimeZone( tz );
     startDateCal.set( complexJobTrigger.getStartYear(), complexJobTrigger.getStartMonth(), complexJobTrigger.getStartDay() );
     startDateCal.set( java.util.Calendar.AM_PM, complexJobTrigger.getStartAmPm() == 0 ? java.util.Calendar.AM : java.util.Calendar.PM );
     startDateCal.set( java.util.Calendar.HOUR_OF_DAY, complexJobTrigger.getStartHour() );
     startDateCal.set( java.util.Calendar.MINUTE, complexJobTrigger.getStartMin() );
+    startDateCal.set( java.util.Calendar.SECOND, 0 );
     return startDateCal;
   }
 
@@ -361,7 +363,7 @@ public class QuartzScheduler implements IScheduler {
     }
 
     Calendar triggerCalendar =
-      quartzTrigger instanceof CronTrigger ? createQuartzCalendar( (ComplexJobTrigger) trigger ) : null;
+      !"Run Once".equalsIgnoreCase( trigger.getUiPassParam() ) ? createQuartzCalendar( (ComplexJobTrigger) trigger ) : null;
 
     if ( outputStreamProvider != null ) {
       jobParams.put( RESERVEDMAPKEY_STREAMPROVIDER, outputStreamProvider );
