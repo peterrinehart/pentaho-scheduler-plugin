@@ -66,23 +66,10 @@ import org.pentaho.platform.web.http.api.resources.JobRequest;
 import org.pentaho.platform.web.http.api.resources.JobScheduleParam;
 import org.pentaho.platform.web.http.api.resources.JobScheduleRequest;
 import org.pentaho.platform.web.http.api.resources.SchedulerResource;
-import org.quartz.Calendar;
-import org.quartz.CronExpression;
-import org.quartz.CronScheduleBuilder;
-import org.quartz.CronTrigger;
-import org.quartz.JobBuilder;
-import org.quartz.JobDataMap;
-import org.quartz.JobDetail;
-import org.quartz.JobKey;
-import org.quartz.Scheduler;
-import org.quartz.SchedulerFactory;
-import org.quartz.SimpleScheduleBuilder;
-import org.quartz.SimpleTrigger;
-import org.quartz.Trigger;
-import org.quartz.TriggerBuilder;
-import org.quartz.TriggerKey;
+import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
 import org.quartz.impl.matchers.GroupMatcher;
+import org.quartz.impl.triggers.CalendarIntervalTriggerImpl;
 import org.quartz.impl.triggers.CronTriggerImpl;
 import org.quartz.impl.triggers.SimpleTriggerImpl;
 import org.quartz.spi.MutableTrigger;
@@ -239,22 +226,18 @@ public class QuartzScheduler implements IScheduler {
 
   public static MutableTrigger createQuartzTrigger( IJobTrigger jobTrigger, QuartzJobKey jobId ) throws SchedulerException {
     MutableTrigger quartzTrigger = null;
+    java.util.Calendar startDateCal = null;
+    TimeZone tz = null;
+    if ( jobTrigger.getStartHour() >= 0 ) {
+      // set time zone from PUC UI input
+      tz = TimeZone.getTimeZone( jobTrigger.getTimeZone() );
+      startDateCal = getJavaCalendarFromTzTrigger( jobTrigger );
+    }
     if ( jobTrigger instanceof ComplexJobTrigger ) {
+
       try {
         ComplexJobTrigger complexJobTrigger = (ComplexJobTrigger) jobTrigger;
         CronTriggerImpl cronTrigger = new CronTriggerImpl();
-        java.util.Calendar startDateCal = java.util.Calendar.getInstance();
-
-        if ( complexJobTrigger.getStartHour() >= 0 ) {
-          // set time zone from PUC UI input
-          TimeZone tz = TimeZone.getTimeZone( complexJobTrigger.getTimeZone() );
-          cronTrigger.setTimeZone( tz );
-          startDateCal = getJavaCalendarFromTzTrigger( complexJobTrigger );
-          cronTrigger.setStartTime( Date.from( startDateCal.toInstant() ) );
-        } else {
-          // legacy; for handling old exports and existing installs
-          cronTrigger.setStartTime( complexJobTrigger.getStartTime() );
-        }
 
         cronTrigger.setName( jobId.toString() );
         cronTrigger.setGroup( jobId.getUserName() );
@@ -262,6 +245,12 @@ public class QuartzScheduler implements IScheduler {
           QuartzCronStringFactory.createCronString( complexJobTrigger ) );
         if ( complexJobTrigger.getEndTime() != null ) {
           cronTrigger.setEndTime( complexJobTrigger.getEndTime() );
+        }
+        if ( jobTrigger.getStartHour() >= 0 ) {
+          cronTrigger.setTimeZone( tz );
+          cronTrigger.setStartTime( startDateCal.getTime() );
+        } else {
+          cronTrigger.setStartTime( jobTrigger.getStartTime() );
         }
         quartzTrigger = cronTrigger;
       } catch ( ParseException e ) {
@@ -273,26 +262,45 @@ public class QuartzScheduler implements IScheduler {
       try {
         SimpleJobTrigger simpleTrigger = (SimpleJobTrigger) jobTrigger;
         long interval = simpleTrigger.getRepeatInterval();
-        if ( interval > 0 ) {
-          interval *= 1000;
-        }
-        int repeatCount =
-          simpleTrigger.getRepeatCount() < 0 ? SimpleTrigger.REPEAT_INDEFINITELY : simpleTrigger.getRepeatCount();
+        int triggerInterval = 0;
+        DateBuilder.IntervalUnit intervalUnit = null;
+        Date triggerEndDate = simpleTrigger.getEndTime();
 
-        SimpleScheduleBuilder schedBuilder = simpleSchedule()
-          .withIntervalInMilliseconds( interval )
-          .withRepeatCount( repeatCount );
-        if ( repeatCount != 0 ) {
-          schedBuilder.withMisfireHandlingInstructionNextWithRemainingCount();
+        CalendarIntervalTriggerImpl calendarIntervalTrigger = new CalendarIntervalTriggerImpl();
+
+        if ( "SECONDS".equalsIgnoreCase( jobTrigger.getUiPassParam() ) ) {
+          triggerInterval = (int) interval;
+          intervalUnit = DateBuilder.IntervalUnit.SECOND;
+        } else if ( "MINUTES".equalsIgnoreCase( jobTrigger.getUiPassParam() ) ) {
+          triggerInterval = (int) interval / 60;
+          intervalUnit = DateBuilder.IntervalUnit.MINUTE;
+        } else if ( "HOURS".equalsIgnoreCase( jobTrigger.getUiPassParam() ) ) {
+          triggerInterval = (int) interval / 3600;
+          intervalUnit = DateBuilder.IntervalUnit.HOUR;
+        } else if ( "RUN_ONCE".equalsIgnoreCase( jobTrigger.getUiPassParam() ) ) {
+          // set the repeat interval to 2 years and the end date to an hour after the start date to ensure this job only runs once
+          // simpletrigger can't handle time zones and no other triggers provide a number of iterations, so this is an alternative
+          triggerInterval = 2;
+          intervalUnit = DateBuilder.IntervalUnit.YEAR;
+          startDateCal.add( java.util.Calendar.HOUR, 1 );
+          triggerEndDate = Date.from( startDateCal.toInstant() );
+        }
+
+        calendarIntervalTrigger.setRepeatInterval( triggerInterval );
+        calendarIntervalTrigger.setRepeatIntervalUnit( intervalUnit );
+        calendarIntervalTrigger.setMisfireInstruction( CalendarIntervalTriggerImpl.MISFIRE_INSTRUCTION_FIRE_ONCE_NOW );
+        if ( null != triggerEndDate ) {
+          calendarIntervalTrigger.setEndTime( triggerEndDate );
+        }
+        if ( jobTrigger.getStartHour() >= 0 ) {
+          calendarIntervalTrigger.setTimeZone( tz );
+          calendarIntervalTrigger.setStartTime( startDateCal.getTime() );
         } else {
-          schedBuilder.withMisfireHandlingInstructionFireNow();
+          calendarIntervalTrigger.setStartTime( simpleTrigger.getStartTime() );
         }
 
-        quartzTrigger = schedBuilder.build();
+        quartzTrigger = calendarIntervalTrigger;
         quartzTrigger.setKey( new TriggerKey( jobId.toString(), jobId.getUserName() ) );
-        quartzTrigger.setStartTime( simpleTrigger.getStartTime() );
-        quartzTrigger.setEndTime( simpleTrigger.getEndTime() );
-
       } catch ( IllegalArgumentException e ) {
         throw new SchedulerException( Messages.getInstance().getString(
           "QuartzScheduler.ERROR_0001_FAILED_TO_SCHEDULE_JOB", jobId.getJobName() ), e );
@@ -326,15 +334,15 @@ public class QuartzScheduler implements IScheduler {
     return triggerCalendar;
   }
 
-  private static java.util.Calendar getJavaCalendarFromTzTrigger( ComplexJobTrigger complexJobTrigger ) {
-    TimeZone tz = TimeZone.getTimeZone( complexJobTrigger.getTimeZone() );
+  private static java.util.Calendar getJavaCalendarFromTzTrigger( IJobTrigger jobTrigger ) {
+    TimeZone tz = TimeZone.getTimeZone( jobTrigger.getTimeZone() );
     java.util.Calendar startDateCal = java.util.Calendar.getInstance();
-    startDateCal.clear();
     startDateCal.setTimeZone( tz );
-    startDateCal.set( complexJobTrigger.getStartYear(), complexJobTrigger.getStartMonth(), complexJobTrigger.getStartDay() );
-    startDateCal.set( java.util.Calendar.AM_PM, complexJobTrigger.getStartAmPm() == 0 ? java.util.Calendar.AM : java.util.Calendar.PM );
-    startDateCal.set( java.util.Calendar.HOUR_OF_DAY, complexJobTrigger.getStartHour() );
-    startDateCal.set( java.util.Calendar.MINUTE, complexJobTrigger.getStartMin() );
+    startDateCal.clear();
+    startDateCal.set( jobTrigger.getStartYear(), jobTrigger.getStartMonth(), jobTrigger.getStartDay() );
+    startDateCal.set( java.util.Calendar.AM_PM, jobTrigger.getStartAmPm() == 0 ? java.util.Calendar.AM : java.util.Calendar.PM );
+    startDateCal.set( java.util.Calendar.HOUR_OF_DAY, jobTrigger.getStartHour() );
+    startDateCal.set( java.util.Calendar.MINUTE, jobTrigger.getStartMin() );
     startDateCal.set( java.util.Calendar.SECOND, 0 );
     return startDateCal;
   }
@@ -632,20 +640,35 @@ public class QuartzScheduler implements IScheduler {
     org.quartz.SchedulerException {
     QuartzJobKey jobKey = QuartzJobKey.parse( job.getJobId() );
     String groupName = jobKey.getUserName();
+    String scheduleType = (String) job.getJobParams().get( RESERVEDMAPKEY_UIPASSPARAM );
 
     if ( trigger instanceof SimpleTrigger ) {
       SimpleTrigger simpleTrigger = (SimpleTrigger) trigger;
-      SimpleJobTrigger simpleJobTrigger = new SimpleJobTrigger();
-      simpleJobTrigger.setStartTime( simpleTrigger.getStartTime() );
-      simpleJobTrigger.setEndTime( simpleTrigger.getEndTime() );
-      simpleJobTrigger.setUiPassParam( (String) job.getJobParams().get( RESERVEDMAPKEY_UIPASSPARAM ) );
-      long interval = simpleTrigger.getRepeatInterval();
-      if ( interval > 0 ) {
-        interval /= 1000;
+      IComplexJobTrigger complexJobTrigger = createComplexJobTrigger();
+
+      if ( "RUN_ONCE".equalsIgnoreCase( scheduleType ) ) {
+        complexJobTrigger.setStartTime( simpleTrigger.getStartTime() );
+        complexJobTrigger.setEndTime( simpleTrigger.getEndTime() );
+//        complexJobTrigger.setStartHour( simpleTrigger.getStartTime().getHours() % 12 );
+//        complexJobTrigger.setStartMin( simpleTrigger.getStartTime().getMinutes() );
+//        complexJobTrigger.setStartYear( simpleTrigger.getStartTime().getYear() + 1900 );
+//        complexJobTrigger.setStartMonth( simpleTrigger.getStartTime().getMonth() );
+//        complexJobTrigger.setStartDay( simpleTrigger.getStartTime().getDay() );
+
+      } else if ( "MINUTES".equalsIgnoreCase( scheduleType ) ) {
+
       }
-      simpleJobTrigger.setRepeatInterval( interval );
-      simpleJobTrigger.setRepeatCount( simpleTrigger.getRepeatCount() );
-      job.setJobTrigger( simpleJobTrigger );
+//      SimpleJobTrigger simpleJobTrigger = new SimpleJobTrigger();
+//      simpleJobTrigger.setStartTime( simpleTrigger.getStartTime() );
+//      simpleJobTrigger.setEndTime( simpleTrigger.getEndTime() );
+//      simpleJobTrigger.setUiPassParam( (String) job.getJobParams().get( RESERVEDMAPKEY_UIPASSPARAM ) );
+//      long interval = simpleTrigger.getRepeatInterval();
+//      if ( interval > 0 ) {
+//        interval /= 1000;
+//      }
+//      simpleJobTrigger.setRepeatInterval( interval );
+//      simpleJobTrigger.setRepeatCount( simpleTrigger.getRepeatCount() );
+//      job.setJobTrigger( simpleJobTrigger );
     } else if ( trigger instanceof CronTrigger ) {
       CronTrigger cronTrigger = (CronTrigger) trigger;
       IComplexJobTrigger complexJobTrigger = createComplexTrigger( cronTrigger.getCronExpression() );

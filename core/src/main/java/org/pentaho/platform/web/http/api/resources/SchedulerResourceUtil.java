@@ -90,6 +90,8 @@ public class SchedulerResourceUtil {
         simpleJobTrigger.setStartTime( new Date() );
       }
 
+      simpleJobTrigger.setTimeZone( scheduleRequest.getTimeZone() );
+
       jobTrigger = simpleJobTrigger;
 
     } else if ( scheduleRequest.getComplexJobTrigger() != null ) {
