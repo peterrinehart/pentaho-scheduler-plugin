@@ -24,6 +24,7 @@ import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.eclipse.swt.internal.C;
 import org.pentaho.platform.api.action.IAction;
 import org.pentaho.platform.api.engine.IPentahoSession;
 import org.pentaho.platform.api.repository2.unified.IUnifiedRepository;
@@ -371,7 +372,7 @@ public class QuartzScheduler implements IScheduler {
     }
 
     Calendar triggerCalendar =
-      !"Run Once".equalsIgnoreCase( trigger.getUiPassParam() ) ? createQuartzCalendar( (ComplexJobTrigger) trigger ) : null;
+      quartzTrigger instanceof CronTrigger ? createQuartzCalendar( (ComplexJobTrigger) trigger ) : null;
 
     if ( outputStreamProvider != null ) {
       jobParams.put( RESERVEDMAPKEY_STREAMPROVIDER, outputStreamProvider );
@@ -640,40 +641,65 @@ public class QuartzScheduler implements IScheduler {
     org.quartz.SchedulerException {
     QuartzJobKey jobKey = QuartzJobKey.parse( job.getJobId() );
     String groupName = jobKey.getUserName();
-    String scheduleType = (String) job.getJobParams().get( RESERVEDMAPKEY_UIPASSPARAM );
 
     if ( trigger instanceof SimpleTrigger ) {
+      // handle the legacy case where there were still simple triggers in the DB
       SimpleTrigger simpleTrigger = (SimpleTrigger) trigger;
-      IComplexJobTrigger complexJobTrigger = createComplexJobTrigger();
+      SimpleJobTrigger simpleJobTrigger = new SimpleJobTrigger();
 
-      if ( "RUN_ONCE".equalsIgnoreCase( scheduleType ) ) {
-        complexJobTrigger.setStartTime( simpleTrigger.getStartTime() );
-        complexJobTrigger.setEndTime( simpleTrigger.getEndTime() );
-//        complexJobTrigger.setStartHour( simpleTrigger.getStartTime().getHours() % 12 );
-//        complexJobTrigger.setStartMin( simpleTrigger.getStartTime().getMinutes() );
-//        complexJobTrigger.setStartYear( simpleTrigger.getStartTime().getYear() + 1900 );
-//        complexJobTrigger.setStartMonth( simpleTrigger.getStartTime().getMonth() );
-//        complexJobTrigger.setStartDay( simpleTrigger.getStartTime().getDay() );
-
-      } else if ( "MINUTES".equalsIgnoreCase( scheduleType ) ) {
-
+      simpleJobTrigger.setStartTime( simpleTrigger.getStartTime() );
+      simpleJobTrigger.setEndTime( simpleTrigger.getEndTime() );
+      simpleJobTrigger.setStartHour( simpleTrigger.getStartTime().getHours() % 12 );
+      simpleJobTrigger.setStartMin( simpleTrigger.getStartTime().getMinutes() );
+      simpleJobTrigger.setStartYear( simpleTrigger.getStartTime().getYear() + 1900 );
+      simpleJobTrigger.setStartMonth( simpleTrigger.getStartTime().getMonth() );
+      simpleJobTrigger.setStartDay( simpleTrigger.getStartTime().getDay() );
+      simpleJobTrigger.setUiPassParam( (String) job.getJobParams().get( RESERVEDMAPKEY_UIPASSPARAM ) );
+      long interval = simpleTrigger.getRepeatInterval();
+      if ( interval > 0 ) {
+        interval /= 1000;
       }
-//      SimpleJobTrigger simpleJobTrigger = new SimpleJobTrigger();
-//      simpleJobTrigger.setStartTime( simpleTrigger.getStartTime() );
-//      simpleJobTrigger.setEndTime( simpleTrigger.getEndTime() );
-//      simpleJobTrigger.setUiPassParam( (String) job.getJobParams().get( RESERVEDMAPKEY_UIPASSPARAM ) );
-//      long interval = simpleTrigger.getRepeatInterval();
-//      if ( interval > 0 ) {
-//        interval /= 1000;
-//      }
-//      simpleJobTrigger.setRepeatInterval( interval );
-//      simpleJobTrigger.setRepeatCount( simpleTrigger.getRepeatCount() );
-//      job.setJobTrigger( simpleJobTrigger );
+      simpleJobTrigger.setRepeatInterval( interval );
+      simpleJobTrigger.setRepeatCount( simpleTrigger.getRepeatCount() );
+      job.setJobTrigger( simpleJobTrigger );
+    } else if ( trigger instanceof CalendarIntervalTrigger ) {
+      CalendarIntervalTrigger calendarIntervalTrigger = (CalendarIntervalTrigger) trigger;
+      SimpleJobTrigger simpleJobTrigger = new SimpleJobTrigger();
+
+      simpleJobTrigger.setStartTime( calendarIntervalTrigger.getStartTime() );
+      simpleJobTrigger.setEndTime( calendarIntervalTrigger.getEndTime() );
+      simpleJobTrigger.setStartHour( calendarIntervalTrigger.getStartTime().getHours() % 12 );
+      simpleJobTrigger.setStartMin( calendarIntervalTrigger.getStartTime().getMinutes() );
+      simpleJobTrigger.setStartYear( calendarIntervalTrigger.getStartTime().getYear() + 1900 );
+      simpleJobTrigger.setStartMonth( calendarIntervalTrigger.getStartTime().getMonth() );
+      simpleJobTrigger.setStartDay( calendarIntervalTrigger.getStartTime().getDay() );
+      simpleJobTrigger.setUiPassParam( (String) job.getJobParams().get( RESERVEDMAPKEY_UIPASSPARAM ) );
+      long interval = 0l;
+
+      switch( calendarIntervalTrigger.getRepeatIntervalUnit() ) {
+        case SECOND:
+          interval = calendarIntervalTrigger.getRepeatInterval();
+          break;
+        case MINUTE:
+          interval = calendarIntervalTrigger.getRepeatInterval() * 60;
+          break;
+        case HOUR:
+          interval = calendarIntervalTrigger.getRepeatInterval() * 3600;
+          break;
+        default: //year == run once
+          interval = -1;
+          break;
+      }
+
+      simpleJobTrigger.setRepeatInterval( interval );
+      simpleJobTrigger.setTimeZone( calendarIntervalTrigger.getTimeZone().getID() );
+      job.setJobTrigger( simpleJobTrigger );
+
     } else if ( trigger instanceof CronTrigger ) {
       CronTrigger cronTrigger = (CronTrigger) trigger;
       IComplexJobTrigger complexJobTrigger = createComplexTrigger( cronTrigger.getCronExpression() );
       complexJobTrigger.setUiPassParam( (String) job.getJobParams().get( RESERVEDMAPKEY_UIPASSPARAM ) );
-      complexJobTrigger.setCronString( ( (CronTrigger) trigger ).getCronExpression() );
+      complexJobTrigger.setCronString( cronTrigger.getCronExpression() );
       List<ITimeRecurrence> timeRecurrences = parseRecurrence( complexJobTrigger.getCronString(), 3 );
       if ( !timeRecurrences.isEmpty() ) {
         ITimeRecurrence recurrence = timeRecurrences.get( 0 );
