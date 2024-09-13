@@ -12,7 +12,7 @@
  * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Lesser General Public License for more details.
  *
- * Copyright (c) 2002-2023 Hitachi Vantara..  All rights reserved.
+ * Copyright (c) 2002-2024 Hitachi Vantara..  All rights reserved.
  */
 
 package org.pentaho.mantle.client.dialogs.scheduling;
@@ -112,6 +112,18 @@ public class RunOnceEditor extends VerticalPanel implements IChangeHandler {
 
   public String getStartTime() {
     return startTimePicker.getTime();
+  }
+
+  public void setStartHour( int hour ) {
+    startTimePicker.setHour( hour );
+  }
+
+  public void setStartMinute( int min ) {
+    startTimePicker.setMinute( min );
+  }
+
+  public void setStartTimeOfDay( int amPm ) {
+    startTimePicker.setTimeOfDay( TimeUtil.TimeOfDay.get( amPm ) );
   }
 
   public void setStartTime( String strTime ) {

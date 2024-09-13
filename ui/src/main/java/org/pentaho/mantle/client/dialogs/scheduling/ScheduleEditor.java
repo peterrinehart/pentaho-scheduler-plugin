@@ -903,6 +903,24 @@ public class ScheduleEditor extends VerticalFlexPanel implements IChangeHandler 
     cronEditor.setStartDate( startDate );
   }
 
+  public void setStartTime( int hour, int min, int amPm ) {
+    runOnceEditor.setStartHour( hour );
+    runOnceEditor.setStartMinute( min );
+    runOnceEditor.setStartTimeOfDay( amPm );
+    recurrenceEditor.setStartHour( hour );
+    recurrenceEditor.setStartMinute( min );
+    recurrenceEditor.setStartTimeOfDay( amPm );
+  }
+
+  public void setTimeZone( String timeZone ) {
+    for ( int i = 0; i < timeZonePicker.getItemCount(); i++ ) {
+      if ( timeZonePicker.getItemText( i ).equalsIgnoreCase( timeZone ) ) {
+        timeZonePicker.setSelectedIndex( i );
+        break;
+      }
+    }
+  }
+
   public boolean getEnableSafeMode() {
     switch ( getScheduleType() ) {
       case RUN_ONCE:
