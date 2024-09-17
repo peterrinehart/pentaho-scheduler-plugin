@@ -327,8 +327,7 @@ public class ScheduleRecurrenceDialog extends AbstractWizardDialog {
 
       scheduleEditor.setStartDate( jsJobTrigger.getStartTime() );
       scheduleEditor.setStartTime( jsJobTrigger.getStartHour(), jsJobTrigger.getStartMin(), jsJobTrigger.getStartAmPm() );
-//      scheduleEditor.setStartTime( DateTimeFormat.getFormat( HOUR_MINUTE_SECOND ).format(
-//        jsJobTrigger.getStartTime() ) );
+      scheduleEditor.setTimeZone( jsJobTrigger.getTimeZone() );
 
       if ( jsJobTrigger.getEndTime() == null ) {
         scheduleEditor.setNoEndDate();

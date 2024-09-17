@@ -20,15 +20,18 @@ package org.pentaho.mantle.client.dialogs.scheduling.validators;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import org.pentaho.gwt.widgets.client.utils.TimeUtil;
 import org.pentaho.mantle.client.dialogs.scheduling.RunOnceEditor;
+import org.pentaho.mantle.client.dialogs.scheduling.ScheduleEditor;
 
 import java.util.Date;
 
 public class RunOnceEditorValidator implements IUiValidator {
 
   private RunOnceEditor editor = null;
+  private ScheduleEditor scheduleEditor;
 
-  public RunOnceEditorValidator( RunOnceEditor editor ) {
-    this.editor = editor;
+  public RunOnceEditorValidator( ScheduleEditor scheduleEditor ) {
+    this.scheduleEditor = scheduleEditor;
+    this.editor = scheduleEditor.getRunOnceEditor();
   }
 
   public boolean isValid() {
@@ -40,6 +43,7 @@ public class RunOnceEditorValidator implements IUiValidator {
       final DateTimeFormat format = DateTimeFormat.getFormat( "MM-dd-yyyy" );
 
       //BISERVER-14912 - Date.before() does not work as expected in GWT, so we need a custom validation to check the day
+      String timeZone = scheduleEditor.getTimeZonePicker().getSelectedValue();
       if ( isBefore( editor.getStartDate(), new Date() ) ) {
         isValid = false;
       } else if ( isBefore( new Date() , editor.getStartDate()) ) {

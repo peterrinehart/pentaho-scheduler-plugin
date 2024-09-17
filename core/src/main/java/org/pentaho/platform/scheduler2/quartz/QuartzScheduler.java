@@ -25,6 +25,7 @@ import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.poi.ss.formula.functions.T;
 import org.pentaho.platform.api.action.IAction;
 import org.pentaho.platform.api.engine.IPentahoSession;
 import org.pentaho.platform.api.repository2.unified.IUnifiedRepository;
@@ -95,6 +96,7 @@ import java.security.Principal;
 import java.text.MessageFormat;
 import java.text.ParseException;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -530,21 +532,23 @@ public class QuartzScheduler implements IScheduler {
       Scheduler scheduler = getQuartzScheduler();
       String groupName = jobKey.getUserName();
       for ( Trigger trigger : scheduler.getTriggersOfJob( new JobKey( jobId, groupName ) ) ) {
-        // triggerJob below causes quartz to make a new trigger starting with MT_ internally.  Ignore those.
-        if ( isManualTrigger( trigger ) ) {
+        if ( "MANUAL_TRIGGER".equals( trigger.getKey().getGroup() ) ) {
           continue;
         }
 
+        TriggerBuilder triggerBuilder = trigger.getTriggerBuilder();
+        triggerBuilder.startNow();
+        trigger = triggerBuilder.build();
+
         // Update trigger with the execution date
-        // this ensures the Last Run column shows this manual execution
         if ( trigger instanceof SimpleTriggerImpl ) {
           ( (SimpleTriggerImpl) trigger ).setPreviousFireTime( new Date() );
         } else if ( trigger instanceof CronTriggerImpl ) {
           ( (CronTriggerImpl) trigger ).setPreviousFireTime( new Date() );
         }
 
-        // Replace the original trigger (this does not cause the job to run)
-        scheduler.rescheduleJob( new TriggerKey( jobId, groupName ), trigger );
+        // Replace the original trigger
+        scheduler.rescheduleJob( new TriggerKey( jobId, groupName ), triggerBuilder.build() );
 
         // Execute the job
         scheduler.triggerJob( new JobKey( jobId, groupName ) );
@@ -553,15 +557,6 @@ public class QuartzScheduler implements IScheduler {
       throw new SchedulerException( Messages.getInstance().getString(
         "QuartzScheduler.ERROR_0007_FAILED_TO_GET_JOB", jobId ), e );
     }
-  }
-
-  /**
-   * Indicates if this trigger was created by quartz internally as a result of a triggerJob call
-   * @param trigger
-   * @return
-   */
-  private boolean isManualTrigger( Trigger trigger ) {
-    return null != trigger.getKey() && null != trigger.getKey().getName() && trigger.getKey().getName().startsWith( "MT_" );
   }
 
   @Override public void setSubjectAvailabilityWindow( IScheduleSubject subject, IComplexJobTrigger window ) {
@@ -614,7 +609,7 @@ public class QuartzScheduler implements IScheduler {
         for ( JobKey jobKey : scheduler.getJobKeys( GroupMatcher.jobGroupEquals( groupName ) ) ) {
           String jobId = jobKey.getName();
           for ( Trigger trigger : scheduler.getTriggersOfJob( jobKey ) ) {
-            if ( isManualTrigger( trigger ) ) {
+            if ( "MANUAL_TRIGGER".equals( trigger.getKey().getGroup() ) ) {
               continue;
             }
             Job job = new Job();
@@ -685,19 +680,17 @@ public class QuartzScheduler implements IScheduler {
       CalendarIntervalTrigger calendarIntervalTrigger = (CalendarIntervalTrigger) trigger;
       SimpleJobTrigger simpleJobTrigger = new SimpleJobTrigger();
 
-      LocalDateTime startTime = LocalDateTime.ofInstant( calendarIntervalTrigger.getStartTime().toInstant(), TimeZone.getDefault().toZoneId() );
-      
-
-      clientStartDate.setTime( calendarIntervalTrigger.getStartTime() );
-      clientStartDate.setTimeZone( calendarIntervalTrigger.getTimeZone() );
+      ZonedDateTime startTime = ZonedDateTime.ofInstant( calendarIntervalTrigger.getStartTime().toInstant(), TimeZone.getDefault().toZoneId() );
+      ZonedDateTime clientStartDate = startTime.withZoneSameInstant( calendarIntervalTrigger.getTimeZone().toZoneId() );
 
       simpleJobTrigger.setStartTime( calendarIntervalTrigger.getStartTime() );
       simpleJobTrigger.setEndTime( calendarIntervalTrigger.getEndTime() );
-      simpleJobTrigger.setStartHour( clientStartDate.get( java.util.Calendar.HOUR ) % 12 );
-      simpleJobTrigger.setStartMin( clientStartDate.get( java.util.Calendar.MINUTE ) );
-      simpleJobTrigger.setStartYear( clientStartDate.get( java.util.Calendar.YEAR ) );
-      simpleJobTrigger.setStartMonth( clientStartDate.get( java.util.Calendar.MONTH ) );
-      simpleJobTrigger.setStartDay( clientStartDate.get( java.util.Calendar.DAY_OF_MONTH ) );
+      simpleJobTrigger.setStartHour( clientStartDate.getHour() % 12 );
+      simpleJobTrigger.setStartMin( clientStartDate.getMinute() );
+      simpleJobTrigger.setStartYear( clientStartDate.getYear() );
+      simpleJobTrigger.setStartMonth( clientStartDate.getMonth().getValue() );
+      simpleJobTrigger.setStartDay( clientStartDate.getDayOfMonth() );
+      simpleJobTrigger.setStartAmPm( clientStartDate.getHour() >= 12 ? 1: 0 );
       simpleJobTrigger.setUiPassParam( (String) job.getJobParams().get( RESERVEDMAPKEY_UIPASSPARAM ) );
       long interval = 0l;
 
@@ -743,19 +736,20 @@ public class QuartzScheduler implements IScheduler {
           QuartzSchedulerAvailability quartzSchedulerAvailability = (QuartzSchedulerAvailability) calendar;
           complexJobTrigger.setStartTime( quartzSchedulerAvailability.getStartTime() );
           complexJobTrigger.setEndTime( quartzSchedulerAvailability.getEndTime() );
-          java.util.Calendar startDateCal = java.util.Calendar.getInstance();
-          startDateCal.clear();
-          startDateCal.setTime( quartzSchedulerAvailability.getStartTime() );
-          startDateCal.setTimeZone( cronTrigger.getTimeZone() );
-          complexJobTrigger.setStartHour( startDateCal.get( java.util.Calendar.HOUR ) );
-          complexJobTrigger.setStartMin( startDateCal.get( java.util.Calendar.MINUTE ) );
-          complexJobTrigger.setStartYear( startDateCal.get( java.util.Calendar.YEAR ) );
-          complexJobTrigger.setStartMonth( startDateCal.get( java.util.Calendar.MONTH ) );
-          complexJobTrigger.setStartDay( startDateCal.get( java.util.Calendar.DAY_OF_MONTH ) );
-          complexJobTrigger.setStartAmPm( startDateCal.get( java.util.Calendar.AM_PM ) );
+
+          ZonedDateTime startTime = ZonedDateTime.ofInstant( cronTrigger.getStartTime().toInstant(), TimeZone.getDefault().toZoneId() );
+          ZonedDateTime clientStartDate = startTime.withZoneSameInstant( cronTrigger.getTimeZone().toZoneId() );
+
+          complexJobTrigger.setStartHour( clientStartDate.getHour() % 12 );
+          complexJobTrigger.setStartMin( clientStartDate.getMinute() );
+          complexJobTrigger.setStartYear( clientStartDate.getYear() );
+          complexJobTrigger.setStartMonth( clientStartDate.getMonth().getValue() );
+          complexJobTrigger.setStartDay( clientStartDate.getDayOfMonth() );
+          complexJobTrigger.setStartAmPm( clientStartDate.getHour() >= 12 ? 1: 0 );
         }
       }
       complexJobTrigger.setCronString( ( (CronTrigger) trigger ).getCronExpression() );
+      complexJobTrigger.setTimeZone( cronTrigger.getTimeZone().toZoneId().getId() );
     }
 
     Trigger.TriggerState triggerState = scheduler.getTriggerState( new TriggerKey( job.getJobId(), groupName ) );

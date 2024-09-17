@@ -220,6 +220,7 @@ public class ScheduleEditor extends VerticalFlexPanel implements IChangeHandler 
   private final Date defaultDate = initDefaultDate();
 
   private String targetTimezone = null;
+  private String initialTimeZone = null;
 
   @SuppressWarnings( "deprecation" )
   private Date initDefaultDate() {
@@ -554,6 +555,9 @@ public class ScheduleEditor extends VerticalFlexPanel implements IChangeHandler 
             String key = keyValue.isString().stringValue();
             String valueForKey = theValue.isString().stringValue();
             timeZonePicker.addItem( valueForKey, key );
+          }
+          if ( null != initialTimeZone ) {
+            serverTZId = initialTimeZone;
           }
           for ( int i = 0; i < timeZonePicker.getItemCount(); i++ ) {
             if ( timeZonePicker.getValue( i ).equalsIgnoreCase( serverTZId ) ) {
@@ -913,9 +917,11 @@ public class ScheduleEditor extends VerticalFlexPanel implements IChangeHandler 
   }
 
   public void setTimeZone( String timeZone ) {
-    for ( int i = 0; i < timeZonePicker.getItemCount(); i++ ) {
-      if ( timeZonePicker.getItemText( i ).equalsIgnoreCase( timeZone ) ) {
-        timeZonePicker.setSelectedIndex( i );
+    ListBox tzPicker = this.getTimeZonePicker();
+    this.initialTimeZone = timeZone;
+    for ( int i = 0; i < tzPicker.getItemCount(); i++ ) {
+      if ( tzPicker.getValue( i ).equalsIgnoreCase( timeZone ) ) {
+        tzPicker.setSelectedIndex( i );
         break;
       }
     }
