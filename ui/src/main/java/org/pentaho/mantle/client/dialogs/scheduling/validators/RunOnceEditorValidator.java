@@ -29,9 +29,9 @@ public class RunOnceEditorValidator implements IUiValidator {
   private RunOnceEditor editor = null;
   private ScheduleEditor scheduleEditor;
 
-  public RunOnceEditorValidator( ScheduleEditor scheduleEditor ) {
+  public RunOnceEditorValidator( ScheduleEditor scheduleEditor, RunOnceEditor runOnceEditor ) {
     this.scheduleEditor = scheduleEditor;
-    this.editor = scheduleEditor.getRunOnceEditor();
+    this.editor = runOnceEditor;
   }
 
   public boolean isValid() {
@@ -40,24 +40,19 @@ public class RunOnceEditorValidator implements IUiValidator {
       isValid = false;
     } else {
 
-      final DateTimeFormat format = DateTimeFormat.getFormat( "MM-dd-yyyy" );
-
       //BISERVER-14912 - Date.before() does not work as expected in GWT, so we need a custom validation to check the day
-      String timeZone = scheduleEditor.getTimeZonePicker().getSelectedValue();
-      if ( isBefore( editor.getStartDate(), new Date() ) ) {
+      String timeZone = "";//scheduleEditor.getTimeZonePicker().getSelectedValue();
+      Date now = getNowInTz( timeZone );
+      if ( isBefore( editor.getStartDate(), now ) ) {
         isValid = false;
-      } else if ( isBefore( new Date() , editor.getStartDate()) ) {
+      } else if ( isBefore( now , editor.getStartDate()) ) {
         //if the date is after today
         isValid = true;
       } else {
         //here we are validating current day
         String time = editor.getStartTime();  //format of time is "hh:mm:ss a"
-
-
-
         time = normalizeTime( time );
-
-        if (isBefore( time, new Date() )) {
+        if (isBefore( time, now )) {
           isValid = false;
         }
       }
@@ -107,4 +102,9 @@ public class RunOnceEditorValidator implements IUiValidator {
     }
     return time;
   }
+
+  final native Date getNowInTz( String timeZone ) /*-{
+    var formatter = Intl.DateTimeFormat( 'en-US', { timeZone: timeZone } );
+    return new Date( formatter.format( new Date() ) );
+  }-*/;
 }

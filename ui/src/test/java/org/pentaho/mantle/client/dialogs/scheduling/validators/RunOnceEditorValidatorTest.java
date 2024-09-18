@@ -18,16 +18,21 @@
 package org.pentaho.mantle.client.dialogs.scheduling.validators;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwtmockito.GwtMockitoTestRunner;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.pentaho.mantle.client.dialogs.scheduling.RunOnceEditor;
+import org.pentaho.mantle.client.dialogs.scheduling.ScheduleEditor;
 
 import java.util.Calendar;
+import java.util.Date;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 @RunWith( GwtMockitoTestRunner.class )
@@ -36,13 +41,20 @@ public class RunOnceEditorValidatorTest {
   @Test
   public void testIsValid() throws Exception {
     final RunOnceEditor runOnceEditor = mock( RunOnceEditor.class );
-    final RunOnceEditorValidator validator = new RunOnceEditorValidator( runOnceEditor );
+    final ScheduleEditor scheduleEditor = mock( ScheduleEditor.class );
+    final ListBox timeZonePicker = mock( ListBox.class );
+
+    when( scheduleEditor.getRunOnceEditor() ).thenReturn( runOnceEditor );
+    when( scheduleEditor.getTimeZonePicker() ).thenReturn( timeZonePicker );
+    when( timeZonePicker.getSelectedValue() ).thenReturn( "UTC" );
+    final RunOnceEditorValidator validator = spy( new RunOnceEditorValidator( scheduleEditor, runOnceEditor ) );
 
     when( runOnceEditor.getStartDate() ).thenReturn( null );
     assertFalse( validator.isValid() );
 
     Calendar calendar = Calendar.getInstance();
     calendar.add( Calendar.SECOND, -1 );
+    when( validator.getNowInTz( anyString() ) ).thenReturn( new Date() );
     when( runOnceEditor.getStartDate() ).thenReturn( calendar.getTime() );
     String startTime = DateTimeFormat.getFormat( "hh:mm:ss a" ).
       format( calendar.getTime() ).toLowerCase();

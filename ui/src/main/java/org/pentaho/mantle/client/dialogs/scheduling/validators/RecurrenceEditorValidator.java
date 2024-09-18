@@ -40,9 +40,8 @@ public class RecurrenceEditorValidator implements IUiValidator {
   protected DateRangeEditorValidator dateRangeEditorValidator = null;
   private ScheduleEditor scheduleEditor;
 
-  public RecurrenceEditorValidator( ScheduleEditor scheduleEditor ) {
-    this.scheduleEditor = scheduleEditor;
-    this.recurrenceEditor = scheduleEditor.getRecurrenceEditor();
+  public RecurrenceEditorValidator( RecurrenceEditor recurrenceEditor ) {
+    this.recurrenceEditor = recurrenceEditor;
     this.dateRangeEditorValidator = new DateRangeEditorValidator( recurrenceEditor.getDateRangeEditor() );
   }
 
