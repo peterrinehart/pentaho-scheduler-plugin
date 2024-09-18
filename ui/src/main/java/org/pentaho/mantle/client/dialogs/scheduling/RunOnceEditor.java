@@ -17,6 +17,9 @@
 
 package org.pentaho.mantle.client.dialogs.scheduling;
 
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.user.client.ui.ListBox;
 import org.pentaho.gwt.widgets.client.controls.DatePickerEx;
 import org.pentaho.gwt.widgets.client.controls.ErrorLabel;
 import org.pentaho.gwt.widgets.client.controls.TimePicker;
@@ -45,6 +48,7 @@ public class RunOnceEditor extends VerticalPanel implements IChangeHandler {
   private static final String SCHEDULE_START_DATE_INPUT = "schedule-start-date-input";
 
   protected TimePicker startTimePicker = null;
+  protected ListBox timeZonePicker = null;
   private DefaultFormat format = new DefaultFormat( DateTimeFormat.getFormat( PredefinedFormat.DATE_SHORT ) );
   protected DatePickerEx startDatePicker = new DatePickerEx( format );
   private ICallback<IChangeHandler> onChangeHandler = null;
@@ -57,7 +61,7 @@ public class RunOnceEditor extends VerticalPanel implements IChangeHandler {
   private final MessageDialogBox errorBox =
     new MessageDialogBox( Messages.getString( "error" ), "", false, false, true );
 
-  public RunOnceEditor( final TimePicker startTimePicker ) {
+  public RunOnceEditor( final TimePicker startTimePicker, final ListBox timeZonePicker ) {
     setWidth( "100%" ); //$NON-NLS-1$
 
     VerticalFlexPanel outerVP = new VerticalFlexPanel();
@@ -75,6 +79,7 @@ public class RunOnceEditor extends VerticalPanel implements IChangeHandler {
     outerVP.add( detailLabel );
 
     this.startTimePicker = startTimePicker;
+    this.timeZonePicker = timeZonePicker;
     configureOnChangeHandler();
   }
 
@@ -170,5 +175,6 @@ public class RunOnceEditor extends VerticalPanel implements IChangeHandler {
     };
     startTimePicker.setOnChangeHandler( handler );
     startDatePicker.setOnChangeHandler( handler );
+    timeZonePicker.addChangeHandler( event -> localThis.changeHandler() );
   }
 }

@@ -35,24 +35,18 @@ public class RunOnceEditorValidator implements IUiValidator {
   }
 
   public boolean isValid() {
-    boolean isValid = true;
-    if ( null == editor.getStartDate() ) {
-      isValid = false;
-    } else {
-
-      //BISERVER-14912 - Date.before() does not work as expected in GWT, so we need a custom validation to check the day
-      String timeZone = scheduleEditor.getTimeZonePicker().getSelectedValue();
-        return false;
-      if ( null == timeZone ) {
-      }
-      int startHour = Integer.parseInt( editor.getStartHour() );
-      if ( "pm".equalsIgnoreCase( editor.getStartTimeOfDay() ) ) {
-        startHour += 12;
-      }
-      isValid = dateInFuture( timeZone, editor.getStartDate().getYear() + 1900, editor.getStartDate().getMonth(), editor.getStartDate().getDate(),
-        startHour, Integer.parseInt( editor.getStartMinute() ) );
+    String timeZone = scheduleEditor.getTimeZonePicker().getSelectedValue();
+    Date startDate = editor.getStartDate();
+    if ( null == startDate || null == timeZone ) {
+      return false;
     }
-    return isValid;
+    //BISERVER-14912 - Date.before() does not work as expected in GWT, so we need a custom validation to check the day
+    int startHour = Integer.parseInt( editor.getStartHour() );
+    if ( "pm".equalsIgnoreCase( editor.getStartTimeOfDay() ) ) {
+      startHour += 12;
+    }
+    return dateInFuture( timeZone, editor.getStartDate().getYear() + 1900, editor.getStartDate().getMonth(), editor.getStartDate().getDate(),
+      startHour, Integer.parseInt( editor.getStartMinute() ) );
   }
 
   public void clear() {

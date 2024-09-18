@@ -441,7 +441,7 @@ public class ScheduleEditor extends VerticalFlexPanel implements IChangeHandler 
     add( vp );
     setCellHeight( vp, "100%" ); //$NON-NLS-1$
 
-    runOnceEditor = new RunOnceEditor( startTimePicker );
+    runOnceEditor = new RunOnceEditor( startTimePicker, timeZonePicker );
     vp.add( runOnceEditor );
     scheduleTypeMap.put( ScheduleType.RUN_ONCE, runOnceEditor );
     runOnceEditor.setVisible( true );
