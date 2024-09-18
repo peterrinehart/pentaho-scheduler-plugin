@@ -126,6 +126,18 @@ public class RunOnceEditor extends VerticalPanel implements IChangeHandler {
     startTimePicker.setTimeOfDay( TimeUtil.TimeOfDay.get( amPm ) );
   }
 
+  public String getStartTimeOfDay() {
+    return startTimePicker.getTimeOfDay().toString();
+  }
+
+  public String getStartHour() {
+    return startTimePicker.getHour();
+  }
+
+  public String getStartMinute() {
+    return startTimePicker.getMinute();
+  }
+
   public void setStartTime( String strTime ) {
     startTimePicker.setTime( strTime );
   }
