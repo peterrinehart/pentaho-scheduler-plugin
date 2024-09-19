@@ -288,6 +288,12 @@ public class QuartzScheduler implements IScheduler {
         } else if ( "HOURS".equalsIgnoreCase( jobTrigger.getUiPassParam() ) ) {
           triggerInterval = (int) interval / 3600;
           intervalUnit = DateBuilder.IntervalUnit.HOUR;
+        } else if ( "DAILY".equalsIgnoreCase( jobTrigger.getUiPassParam() ) ) {
+          // "ignore DST" case; execute on multiples of 24 hours ignoring DST adjustments to time of day
+          triggerInterval = (int) interval / 86400;
+          intervalUnit = DateBuilder.IntervalUnit.DAY;
+          calendarIntervalTrigger.setPreserveHourOfDayAcrossDaylightSavings( true );
+          calendarIntervalTrigger.setSkipDayIfHourDoesNotExist( false );
         } else if ( "RUN_ONCE".equalsIgnoreCase( jobTrigger.getUiPassParam() ) ) {
           // set the repeat interval to 2 years and the end date to an hour after the start date to ensure this job only runs once
           // simpletrigger can't handle time zones and no other triggers provide a number of iterations, so this is an alternative
@@ -338,8 +344,12 @@ public class QuartzScheduler implements IScheduler {
     Calendar triggerCalendar = null;
     if ( complexJobTrigger.getStartHour() > -1 ) {
       java.util.Calendar startDateCal = getStartDateCalFromTrigger( complexJobTrigger );
-      java.util.Calendar endDateCal = getEndDateCalFromTrigger( complexJobTrigger );
-      triggerCalendar = new QuartzSchedulerAvailability( Date.from( startDateCal.toInstant() ), Date.from( endDateCal.toInstant() ) );
+      if ( complexJobTrigger.getEndTime() != null ) {
+        java.util.Calendar endDateCal = getEndDateCalFromTrigger( complexJobTrigger );
+        triggerCalendar = new QuartzSchedulerAvailability( Date.from( startDateCal.toInstant() ), Date.from( endDateCal.toInstant() ) );
+      } else {
+        triggerCalendar = new QuartzSchedulerAvailability( Date.from( startDateCal.toInstant() ), null );
+      }
     } else if ( ( complexJobTrigger.getStartTime() != null ) || ( complexJobTrigger.getEndTime() != null ) ) {
       triggerCalendar =
         new QuartzSchedulerAvailability( complexJobTrigger.getStartTime(), complexJobTrigger.getEndTime() );
@@ -704,6 +714,9 @@ public class QuartzScheduler implements IScheduler {
         case HOUR:
           interval = calendarIntervalTrigger.getRepeatInterval() * 3600;
           break;
+        case DAY:
+          interval = calendarIntervalTrigger.getRepeatInterval() * 86400;
+          break;
         default: //year == run once
           interval = -1;
           break;
@@ -737,7 +750,7 @@ public class QuartzScheduler implements IScheduler {
           complexJobTrigger.setStartTime( quartzSchedulerAvailability.getStartTime() );
           complexJobTrigger.setEndTime( quartzSchedulerAvailability.getEndTime() );
 
-          ZonedDateTime startTime = ZonedDateTime.ofInstant( cronTrigger.getStartTime().toInstant(), TimeZone.getDefault().toZoneId() );
+          ZonedDateTime startTime = ZonedDateTime.ofInstant( quartzSchedulerAvailability.getStartTime().toInstant(), TimeZone.getDefault().toZoneId() );
           ZonedDateTime clientStartDate = startTime.withZoneSameInstant( cronTrigger.getTimeZone().toZoneId() );
 
           complexJobTrigger.setStartHour( clientStartDate.getHour() % 12 );

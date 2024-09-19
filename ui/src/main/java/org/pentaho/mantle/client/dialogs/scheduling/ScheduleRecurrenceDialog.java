@@ -248,7 +248,7 @@ public class ScheduleRecurrenceDialog extends AbstractWizardDialog {
       if ( scheduleType == ScheduleType.CRON || jsJobTrigger.getType().equals( "cronJobTrigger" ) ) { //$NON-NLS-1$
         scheduleEditor.getCronEditor().setCronString( jsJobTrigger.getCronString() );
       } else if ( jsJobTrigger.getType().equals( "simpleJobTrigger" ) ) { //$NON-NLS-1$
-        if ( jsJobTrigger.getRepeatCount() == -1 ) {
+        if ( scheduleType != ScheduleType.RUN_ONCE ) {
           // Recurring simple Trigger
           int interval = jsJobTrigger.getRepeatInterval();
           scheduleEditor.setRepeatInSecs( interval );
@@ -326,7 +326,13 @@ public class ScheduleRecurrenceDialog extends AbstractWizardDialog {
       }
 
       scheduleEditor.setStartDate( jsJobTrigger.getStartTime() );
-      scheduleEditor.setStartTime( jsJobTrigger.getStartHour(), jsJobTrigger.getStartMin(), jsJobTrigger.getStartAmPm() );
+      int uiStartHour = jsJobTrigger.getStartHour();
+      if ( uiStartHour == 0 ) {
+        uiStartHour = 12;
+      } else if ( uiStartHour > 12 ) {
+        uiStartHour -= 12;
+      }
+      scheduleEditor.setStartTime( uiStartHour, jsJobTrigger.getStartMin(), jsJobTrigger.getStartAmPm() );
       scheduleEditor.setTimeZone( jsJobTrigger.getTimeZone() );
 
       if ( jsJobTrigger.getEndTime() == null ) {
