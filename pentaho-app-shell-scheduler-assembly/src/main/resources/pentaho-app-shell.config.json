@@ -1,0 +1,32 @@
+{
+  "baseDir": "webclient",
+  "apps": {},
+  "header": {
+    "actions": []
+  },
+  "providers": [],
+  "menu": [
+    {
+      "ordinal": 20,
+      "label": "schedulerMenuLabel",
+      "target": "/scheduler",
+      "icon": {
+        "iconType": "uikit",
+        "name": "Branch"
+      }
+    }
+  ],
+  "mainPanel": {
+    "views": [
+      {
+        "bundle": "@self/pages/Example.js",
+        "route": "/scheduler"
+      }
+    ]
+  },
+  "translations": {
+    "en": {
+      "schedulerMenuLabel": "Scheduler"
+    }
+  }
+}

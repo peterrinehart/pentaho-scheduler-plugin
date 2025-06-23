@@ -39,8 +39,10 @@
     </dependencies>
   </dependencyManagement>
   <modules>
-      <module>core</module>
-      <module>ui</module>
-      <module>assembly</module>
+    <module>core</module>
+    <module>ui</module>
+    <module>assembly</module>
+    <module>webclient</module>
+    <module>pentaho-app-shell-scheduler-assembly</module>
   </modules>
 </project>

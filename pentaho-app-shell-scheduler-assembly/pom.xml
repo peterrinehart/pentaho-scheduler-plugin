@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>pentaho</groupId>
+    <artifactId>pentaho-scheduler-plugin-parent</artifactId>
+    <version>10.3.0.0-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>pas-scheduler</artifactId>
+  <packaging>pom</packaging>
+
+  <properties>
+    <!--suppress UnresolvedMavenProperty -->
+    <server.system.directory>${biserverHome}/pentaho-solutions/system</server.system.directory>
+    <plugin.name>pas-scheduler</plugin.name>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>pentaho</groupId>
+      <artifactId>scheduler-plugin-ui</artifactId>
+      <version>${project.version}</version>
+      <type>zip</type>
+    </dependency>
+
+    <!-- region Extra Generic File Service dependencies used in plugin.spring.xml -->
+    <!-- NOTE: the pentaho-scheduler-api artifact comes transitively with the backend module -->
+
+    <!-- NOTE: the obfuscated pentaho-scheduler-ee-core dependency is declared in below profiles -->
+    <!-- endregion -->
+
+    <!-- used in plugin.spring.xml -->
+    <dependency>
+      <groupId>pentaho</groupId>
+      <artifactId>pentaho-platform-extensions</artifactId>
+      <version>${platform.version}</version>
+      <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <artifactId>*</artifactId>
+          <groupId>*</groupId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+  </dependencies>
+
+  <profiles>
+    <profile>
+      <id>obfuscated-dependencies</id>
+      <activation>
+        <property>
+          <name>release</name>
+        </property>
+      </activation>
+    </profile>
+    <profile>
+      <id>non-obfuscated-dependencies</id>
+      <activation>
+        <property>
+          <name>!release</name>
+        </property>
+      </activation>
+
+    </profile>
+    <profile>
+      <id>unzip-assembly-to-local-biserver</id>
+      <activation>
+        <property>
+          <name>biserverHome</name>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-antrun-plugin</artifactId>
+            <version>${maven-antrun-plugin.version}</version>
+            <executions>
+              <execution>
+                <id>unzipIt</id>
+                <phase>install</phase>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+                <configuration>
+                  <target>
+                    <echo message="Removing existing plugin from ${server.system.directory}"/>
+                    <delete includeemptydirs="true" dir="${server.system.directory}/${plugin.name}"/>
+                    <echo message="Unzipping plugin in ${server.system.directory}"/>
+                    <unzip src="${project.build.directory}/${project.artifactId}-${project.version}.zip"
+                           dest="${server.system.directory}"/>
+                  </target>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+</project>
