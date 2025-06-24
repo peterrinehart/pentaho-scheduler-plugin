@@ -42,7 +42,6 @@
     <module>core</module>
     <module>ui</module>
     <module>assembly</module>
-    <module>webclient</module>
-    <module>pentaho-app-shell-scheduler-assembly</module>
+    <module>pentaho-app-shell-scheduler</module>
   </modules>
 </project>

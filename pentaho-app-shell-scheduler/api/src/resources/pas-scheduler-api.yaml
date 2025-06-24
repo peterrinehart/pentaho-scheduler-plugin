@@ -1,0 +1,619 @@
+openapi: 3.1.0
+info:
+  title: Pentaho Scheduler API
+  version: 1.0.0
+  description: REST API for managing scheduled jobs and blockouts in Pentaho.
+
+servers:
+  - url: http://localhost:8080/pentaho/plugin
+
+paths:
+  /api/scheduler/triggerNow:
+    post:
+      summary: Execute a previously scheduled job
+      requestBody:
+        required: true
+        content:
+          application/xml:
+            schema: { $ref: '#/components/schemas/JobRequest' }
+          application/json:
+            schema: { $ref: '#/components/schemas/JobRequest' }
+      responses:
+        '200':
+          description: Job triggered successfully
+          content:
+            text/plain:
+              schema:
+                type: string
+        '400':
+          description: Invalid input
+        '500':
+          description: Invalid jobId
+  /api/scheduler/getContentCleanerJob:
+
+    get:
+      summary: Get the scheduled job for deleting generated files
+      responses:
+        '200':
+          description: Content cleaner job successfully retrieved
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Job' }
+            application/xml:
+              schema: { $ref: '#/components/schemas/Job' }
+        '204':
+          description: No content cleaner job exists
+
+  /api/scheduler/getJobs:
+    get:
+      summary: Retrieve all scheduled jobs visible to the current user
+      responses:
+        '200':
+          description: Jobs retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Job' }
+            application/xml:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Job' }
+        '500':
+          description: Error while retrieving jobs
+
+  /api/scheduler/isScheduleAllowed:
+    get:
+      summary: Checks whether the current user may schedule a repository file
+      parameters:
+        - in: query
+          name: id
+          schema: { type: string }
+          required: true
+      responses:
+        '200':
+          description: Scheduling ability retrieved
+          content:
+            text/plain:
+              schema: { type: string }
+        '500':
+          description: Invalid repository file id
+
+  /api/scheduler/canSchedule:
+    get:
+      summary: Checks whether the current user can schedule any content
+      responses:
+        '200':
+          description: Scheduling permission retrieved
+          content:
+            application/json:
+              schema: { type: string }
+        '500':
+          description: Unable to retrieve the scheduling permission
+
+  /api/scheduler/canExecuteSchedules:
+    get:
+      summary: Checks whether the current user can execute schedules
+      responses:
+        '200':
+          description: Scheduling execution permission retrieved
+          content:
+            application/json:
+              schema: { type: string }
+        '500':
+          description: Unable to retrieve the scheduling permission
+
+  /api/scheduler/state:
+    get:
+      summary: Returns the state of the scheduler
+      responses:
+        '200':
+          description: Scheduler state retrieved
+          content:
+            text/plain:
+              schema: { type: string }
+        '500':
+          description: Error getting scheduler state
+
+  /api/scheduler/start:
+    post:
+      summary: Resume the scheduler from a paused state
+      responses:
+        '200':
+          description: Scheduler started
+          content:
+            text/plain:
+              schema: { type: string }
+        '500':
+          description: Error resuming scheduler
+
+  /api/scheduler/pause:
+    post:
+      summary: Pause the scheduler from a running state
+      responses:
+        '200':
+          description: Scheduler paused
+          content:
+            text/plain:
+              schema: { type: string }
+        '500':
+          description: Error pausing scheduler
+
+  /api/scheduler/shutdown:
+    post:
+      summary: Shuts down the scheduler
+      responses:
+        '200':
+          description: Scheduler shut down
+          content:
+            text/plain:
+              schema: { type: string }
+        '500':
+          description: Error shutting down scheduler
+
+  /api/scheduler/jobState:
+    post:
+      summary: Checks the state of the selected scheduled job
+      requestBody:
+        required: true
+        content:
+          application/xml:
+            schema: { $ref: '#/components/schemas/JobRequest' }
+          application/json:
+            schema: { $ref: '#/components/schemas/JobRequest' }
+      responses:
+        '200':
+          description: Job state retrieved
+          content:
+            text/plain:
+              schema: { type: string }
+        '500':
+          description: Invalid jobId
+
+  /api/scheduler/pauseJob:
+    post:
+      summary: Pause the specified scheduled job
+      requestBody:
+        required: true
+        content:
+          application/xml:
+            schema: { $ref: '#/components/schemas/JobRequest' }
+          application/json:
+            schema: { $ref: '#/components/schemas/JobRequest' }
+      responses:
+        '200':
+          description: Job paused
+          content:
+            text/plain:
+              schema: { type: string }
+        '500':
+          description: Invalid jobId
+
+  /api/scheduler/resumeJob:
+    post:
+      summary: Resume the specified scheduled job
+      requestBody:
+        required: true
+        content:
+          application/xml:
+            schema: { $ref: '#/components/schemas/JobRequest' }
+          application/json:
+            schema: { $ref: '#/components/schemas/JobRequest' }
+      responses:
+        '200':
+          description: Job resumed
+          content:
+            text/plain:
+              schema: { type: string }
+        '500':
+          description: Invalid jobId
+
+  /api/scheduler/removeJob:
+    put:
+      summary: Delete the specified scheduled job
+      requestBody:
+        required: true
+        content:
+          application/xml:
+            schema: { $ref: '#/components/schemas/JobRequest' }
+          application/json:
+            schema: { $ref: '#/components/schemas/JobRequest' }
+      responses:
+        '200':
+          description: Job removed
+          content:
+            text/plain:
+              schema: { type: string }
+        '500':
+          description: Invalid jobId
+
+  /api/scheduler/removeJobs:
+    post:
+      summary: Deletes all the specified scheduled jobs
+      requestBody:
+        required: true
+        content:
+          application/xml:
+            schema: { $ref: '#/components/schemas/JobsRequest' }
+          application/json:
+            schema: { $ref: '#/components/schemas/JobsRequest' }
+      responses:
+        '200':
+          description: Jobs new states returned
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/JobsResponse' }
+            application/xml:
+              schema: { $ref: '#/components/schemas/JobsResponse' }
+        '500':
+          description: Invalid request or server error
+
+  /api/scheduler/jobinfo:
+    get:
+      summary: Return the information for a specified job
+      parameters:
+        - in: query
+          name: jobId
+          schema: { type: string }
+          required: true
+        - in: query
+          name: asCronString
+          schema: { type: string }
+          required: false
+      responses:
+        '200':
+          description: Job info retrieved
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Job' }
+            application/xml:
+              schema: { $ref: '#/components/schemas/Job' }
+        '204':
+          description: Job does not exist
+        '500':
+          description: Internal error or invalid jobId
+
+  /api/scheduler/blockout/blockoutjobs:
+    get:
+      summary: Get all the blockout jobs in the system
+      responses:
+        '200':
+          description: Blockout jobs retrieved
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Job' }
+            application/xml:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Job' }
+        '500':
+          description: Error while retrieving blockout jobs
+
+  /api/scheduler/blockout/hasblockouts:
+    get:
+      summary: Checks if there are blockouts in the system
+      responses:
+        '200':
+          description: Blockout status
+          content:
+            text/plain:
+              schema: { type: string }
+
+  /api/scheduler/blockout/add:
+    post:
+      summary: Creates a new blockout for scheduled jobs
+      requestBody:
+        required: true
+        content:
+          application/xml:
+            schema: { $ref: '#/components/schemas/JobScheduleRequest' }
+          application/json:
+            schema: { $ref: '#/components/schemas/JobScheduleRequest' }
+      responses:
+        '200':
+          description: Blockout created
+          content:
+            text/plain:
+              schema: { type: string }
+        '401':
+          description: Not authorized
+
+  /api/scheduler/blockout/update:
+    post:
+      summary: Update an existing blockout
+      parameters:
+        - in: query
+          name: jobid
+          schema: { type: string }
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/xml:
+            schema: { $ref: '#/components/schemas/JobScheduleRequest' }
+          application/json:
+            schema: { $ref: '#/components/schemas/JobScheduleRequest' }
+      responses:
+        '200':
+          description: Blockout updated
+          content:
+            text/plain:
+              schema: { type: string }
+        '401':
+          description: Not authorized
+
+  /api/scheduler/blockout/willFire:
+    post:
+      summary: Checks if the selected blockout schedule will be fired
+      requestBody:
+        required: true
+        content:
+          application/xml:
+            schema: { $ref: '#/components/schemas/JobScheduleRequest' }
+          application/json:
+            schema: { $ref: '#/components/schemas/JobScheduleRequest' }
+      responses:
+        '200':
+          description: Will fire status
+          content:
+            text/plain:
+              schema: { type: string }
+        '500':
+          description: Error determining blockout firing
+
+  /api/scheduler/blockout/shouldFireNow:
+    get:
+      summary: Checks if the selected blockout schedule should be fired now
+      responses:
+        '200':
+          description: Should fire now status
+          content:
+            text/plain:
+              schema: { type: string }
+
+  /api/scheduler/blockout/blockstatus:
+    post:
+      summary: Check the status of the selected blockout schedule
+      requestBody:
+        required: true
+        content:
+          application/xml:
+            schema: { $ref: '#/components/schemas/JobScheduleRequest' }
+          application/json:
+            schema: { $ref: '#/components/schemas/JobScheduleRequest' }
+      responses:
+        '200':
+          description: Blockout status
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/BlockStatusProxy' }
+            application/xml:
+              schema: { $ref: '#/components/schemas/BlockStatusProxy' }
+        '401':
+          description: Not authorized
+
+  /api/scheduler/generatedContentForSchedule:
+    get:
+      summary: Retrieve the list of execute content by lineage id
+      parameters:
+        - in: query
+          name: lineageId
+          schema: { type: string }
+          required: true
+      responses:
+        '200':
+          description: Generated content for schedule
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/RepositoryFileDto' }
+            application/xml:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/RepositoryFileDto' }
+
+components:
+  schemas:
+    JobRequest:
+      type: object
+      properties:
+        jobId:
+          type: string
+
+    JobsRequest:
+      type: object
+      properties:
+        jobIds:
+          type: array
+          items:
+            type: string
+
+    JobsResponse:
+      type: object
+      properties:
+        changes:
+          type: object
+          additionalProperties:
+            type: string
+
+    Job:
+      type: object
+      properties:
+        jobId:
+          type: string
+        jobName:
+          type: string
+        groupName:
+          type: string
+        jobParams:
+          type: array
+          items:
+            $ref: '#/components/schemas/JobParam'
+        jobTrigger:
+          type: object
+        lastRun:
+          type: string
+          format: date-time
+        nextRun:
+          type: string
+          format: date-time
+        state:
+          type: string
+        userName:
+          type: string
+
+    JobParam:
+      type: object
+      properties:
+        name:
+          type: string
+        value:
+          type: string
+
+    JobScheduleRequest:
+      type: object
+      properties:
+        jobName:
+          type: string
+        complexJobTrigger:
+          type: object
+        inputFile:
+          type: string
+        outputFile:
+          type: string
+        duration:
+          type: integer
+        timeZone:
+          type: string
+
+    RunOnceJobScheduleRequest:
+      type: object
+      properties:
+        jobId:
+          type: string
+        jobName:
+          type: string
+        startDate:
+          type: string
+          format: date-time
+        inputFile:
+          type: string
+        outputFile:
+          type: string
+        timeZone:
+          type: string
+        enableSafeMode:
+          type: boolean
+        gatheringMetrics:
+          type: boolean
+        logLevel:
+          type: string
+
+    SecondsJobScheduleRequest:
+      type: object
+      properties:
+        jobId:
+          type: string
+        jobName:
+          type: string
+        startDate:
+          type: string
+          format: date-time
+        endDate:
+          type: string
+          format: date-time
+        repeatInterval:
+          type: integer
+        inputFile:
+          type: string
+        outputFile:
+          type: string
+        timeZone:
+          type: string
+        enableSafeMode:
+          type: boolean
+        gatheringMetrics:
+          type: boolean
+        logLevel:
+          type: string
+    DailyJobScheduleRequest:
+      type: object
+      properties:
+        jobId:
+          type: string
+        jobName:
+          type: string
+        startDate:
+          type: string
+          format: date-time
+        endDate:
+          type: string
+          format: date-time
+        repeatInterval:
+          type: integer
+        ignoreDST:
+          type: boolean
+        isEveryNDays:
+          type: boolean
+
+        inputFile:
+          type: string
+        outputFile:
+          type: string
+        timeZone:
+          type: string
+        enableSafeMode:
+          type: boolean
+        gatheringMetrics:
+          type: boolean
+        logLevel:
+          type: string
+
+    BlockStatusProxy:
+      type: object
+      properties:
+        partiallyBlocked:
+          type: boolean
+        totallyBlocked:
+          type: boolean
+
+    RepositoryFileDto:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        path:
+          type: string
+        title:
+          type: string
+        createdDate:
+          type: integer
+        lastModifiedDate:
+          type: integer
+        fileSize:
+          type: integer
+        folder:
+          type: boolean
+        hidden:
+          type: boolean
+        locked:
+          type: boolean
+        locale:
+          type: string
+        versionId:
+          type: string
+        versioned:
+          type: boolean
+        originalParentFolderPath:
+          type: string
+        ownerType:
+          type: integer
+        localePropertiesMapEntries:
+          type: array
+          items:
+            type: object

@@ -6,7 +6,7 @@
 
   <parent>
     <groupId>pentaho</groupId>
-    <artifactId>pentaho-scheduler-plugin-parent</artifactId>
+    <artifactId>pentaho-app-shell-scheduler</artifactId>
     <version>10.3.0.0-SNAPSHOT</version>
   </parent>
 
