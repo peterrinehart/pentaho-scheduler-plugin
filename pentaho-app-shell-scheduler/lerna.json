@@ -1,0 +1,24 @@
+{
+  "$schema": "node_modules/lerna/schemas/lerna-schema.json",
+  "version": "independent",
+  "yes": true,
+  "command": {
+    "publish": {
+      "npmClient": "npm"
+    },
+    "version": {
+      "allowBranch": [
+        "master"
+      ],
+      "message": "chore(release): bump package(s) version(s) and update changelog(s)",
+      "conventionalCommits": true,
+      "exact": true,
+      "ignoreChanges": [
+        "**/*.md",
+        "**/tests/**",
+        "**/test-results/**"
+      ],
+      "private": false
+    }
+  }
+}

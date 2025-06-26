@@ -1,0 +1,10 @@
+{
+  "name": "@pentaho-apps/pas-scheduler-api",
+  "version": "1.0.0",
+  "description": "Api module to generate open api file specification. Required so that there is a symlink in the node_modules (handled by npm workspaces) making it possible for webclient scripts to bundle the api in the needed format.",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "redocly bundle src/main/resources/pas-scheduler-api.yaml -o dist/spec/pas-scheduler-api.yaml --ext yaml"
+  }
+}

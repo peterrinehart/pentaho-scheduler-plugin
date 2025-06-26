@@ -3,7 +3,7 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.pentaho</groupId>
+    <groupId>pentaho</groupId>
     <artifactId>pentaho-scheduler-plugin-parent</artifactId>
     <version>10.3.0.0-SNAPSHOT</version>
   </parent>
@@ -13,11 +13,420 @@
   <packaging>pom</packaging>
 
   <properties>
+    <nodejs.version>v22.2.0</nodejs.version>
+    <npm.version>10.7.0</npm.version>
 
+    <!-- region Project Dependencies -->
+    <openapi-generator-maven-plugin.version>7.13.0</openapi-generator-maven-plugin.version>
+    <swagger-annotations.version>1.6.16</swagger-annotations.version>
+    <jakarta.validation-api.version>2.0.2</jakarta.validation-api.version>
+    <javax.annotation-api.version>1.3.2</javax.annotation-api.version>
+    <slf4j-nop.version>2.0.17</slf4j-nop.version>
+    <jsoup.version>1.20.1</jsoup.version>
+    <lombok.version>1.18.38</lombok.version>
+    <mapstruct.version>1.6.3</mapstruct.version>
+    <lombok-mapstruct-binding.version>0.2.0</lombok-mapstruct-binding.version>
+    <!-- @Null @Nullable annotations -->
+    <com.github.spotbugs.annotations.version>4.9.3</com.github.spotbugs.annotations.version>
+    <generic-file-system.version>1.3.1</generic-file-system.version>
+    <problem-details.version>1.0.0</problem-details.version>
+    <!-- endregion Project Dependencies -->
+
+    <!-- region Platform Dependencies -->
+    <pentaho.version>10.3.0.0-SNAPSHOT</pentaho.version>
+    <javax.servlet-api.version>4.0.1</javax.servlet-api.version>
+    <jsr311-api.version>1.1.1</jsr311-api.version>
+    <!-- endregion Platform Dependencies -->
+
+    <!-- region Test Dependencies -->
+    <junit-bom.version>5.13.1</junit-bom.version>
+    <mockito.version>5.18.0</mockito.version>
+    <commons-collections.version>3.2.2</commons-collections.version>
+    <jersey.version>1.19.4</jersey.version>
+    <!-- endregion Test Dependencies -->
+
+    <!-- region Maven Plugins, add version property to activate -->
+    <maven-surefire-plugin.version>3.3.0</maven-surefire-plugin.version>
+    <artifactory-maven-plugin.version>3.7.0</artifactory-maven-plugin.version>
+    <exec-maven-plugin.version>3.0.0</exec-maven-plugin.version>
+    <!-- endregion Maven Plugins -->
+
+    <!-- region Other Properties -->
+    <!--suppress UnresolvedMavenProperty -->
+    <server.system.directory>${biserverHome}/pentaho-solutions/system</server.system.directory>
+    <plugin.readme.file>install_guide.txt</plugin.readme.file>
+    <!-- endregion Other Properties -->
   </properties>
 
+  <dependencyManagement>
+    <dependencies>
+      <!-- region Project Dependencies -->
+      <dependency>
+        <groupId>com.github.spotbugs</groupId>
+        <artifactId>spotbugs-annotations</artifactId>
+        <version>${com.github.spotbugs.annotations.version}</version>
+        <optional>true</optional>
+        <exclusions>
+          <!-- This is provided by the Pentaho server -->
+          <exclusion>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>jsr305</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+      <dependency>
+        <groupId>org.projectlombok</groupId>
+        <artifactId>lombok</artifactId>
+        <version>${lombok.version}</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.mapstruct</groupId>
+        <artifactId>mapstruct</artifactId>
+        <version>${mapstruct.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jsoup</groupId>
+        <artifactId>jsoup</artifactId>
+        <version>${jsoup.version}</version>
+      </dependency>
+      <!-- endregion Project Dependencies -->
+
+      <!-- region Platform Dependencies -->
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-core</artifactId>
+        <version>${fasterxml-jackson.version}</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-annotations</artifactId>
+        <version>${fasterxml-jackson.version}</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-databind</artifactId>
+        <version>${fasterxml-jackson-databind.version}</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>pentaho</groupId>
+        <artifactId>pentaho-platform-api</artifactId>
+        <version>${pentaho.version}</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>pentaho</groupId>
+        <artifactId>pentaho-platform-core</artifactId>
+        <version>${pentaho.version}</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>pentaho</groupId>
+        <artifactId>pentaho-platform-extensions</artifactId>
+        <version>${pentaho.version}</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>pentaho</groupId>
+        <artifactId>pentaho-generic-file-system-api</artifactId>
+        <version>${generic-file-system.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>pentaho</groupId>
+        <artifactId>pentaho-generic-file-system-impl</artifactId>
+        <version>${generic-file-system.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>pentaho</groupId>
+        <artifactId>pentaho-vfs-connection-manager-api</artifactId>
+        <version>${generic-file-system.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>pentaho</groupId>
+        <artifactId>pentaho-vfs-connection-manager-api</artifactId>
+        <version>${generic-file-system.version}</version>
+        <classifier>obf</classifier>
+      </dependency>
+      <dependency>
+        <groupId>pentaho</groupId>
+        <artifactId>pentaho-vfs-connection-manager-impl</artifactId>
+        <version>${generic-file-system.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>pentaho</groupId>
+        <artifactId>pentaho-vfs-connection-manager-impl</artifactId>
+        <version>${generic-file-system.version}</version>
+        <classifier>obf</classifier>
+      </dependency>
+      <dependency>
+        <groupId>pentaho</groupId>
+        <artifactId>pentaho-vfs-provider</artifactId>
+        <version>${generic-file-system.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>pentaho</groupId>
+        <artifactId>pentaho-vfs-provider</artifactId>
+        <version>${generic-file-system.version}</version>
+        <classifier>obf</classifier>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-beans</artifactId>
+        <version>${spring.version}</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>commons-io</groupId>
+        <artifactId>commons-io</artifactId>
+        <version>${commons-io.version}</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-api</artifactId>
+        <version>${slf4j.version}</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>javax.servlet</groupId>
+        <artifactId>javax.servlet-api</artifactId>
+        <version>${javax.servlet-api.version}</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>javax.ws.rs</groupId>
+        <artifactId>jsr311-api</artifactId>
+        <version>${jsr311-api.version}</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.google.guava</groupId>
+        <artifactId>guava</artifactId>
+        <version>${guava.version}</version>
+        <scope>provided</scope>
+      </dependency>
+      <!-- endregion Platform Dependencies -->
+
+      <!-- region Generated Code Dependencies -->
+      <dependency>
+        <groupId>io.swagger</groupId>
+        <artifactId>swagger-annotations</artifactId>
+        <version>${swagger-annotations.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>jakarta.validation</groupId>
+        <artifactId>jakarta.validation-api</artifactId>
+        <version>${jakarta.validation-api.version}</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>javax.annotation</groupId>
+        <artifactId>javax.annotation-api</artifactId>
+        <version>${javax.annotation-api.version}</version>
+        <scope>provided</scope>
+      </dependency>
+      <!-- endregion Generated Code Dependencies -->
+
+      <!-- region Test Dependencies -->
+      <dependency>
+        <groupId>org.junit</groupId>
+        <artifactId>junit-bom</artifactId>
+        <version>${junit-bom.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.mockito</groupId>
+        <artifactId>mockito-core</artifactId>
+        <version>${mockito.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.sun.jersey</groupId>
+        <artifactId>jersey-bundle</artifactId>
+        <version>${jersey.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework.security</groupId>
+        <artifactId>spring-security-core</artifactId>
+        <version>${spring-security.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>commons-collections</groupId>
+        <artifactId>commons-collections</artifactId>
+        <version>${commons-collections.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>commons-logging</groupId>
+        <artifactId>commons-logging</artifactId>
+        <version>${commons-logging.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.pentaho</groupId>
+        <artifactId>commons-xul-core</artifactId>
+        <version>${pentaho.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.dom4j</groupId>
+        <artifactId>dom4j</artifactId>
+        <version>${dom4j.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-nop</artifactId>
+        <version>${slf4j-nop.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.logging.log4j</groupId>
+        <artifactId>log4j-slf4j-impl</artifactId>
+        <version>${log4j.version}</version>
+      </dependency>
+      <!-- endregion Test Dependencies -->
+    </dependencies>
+  </dependencyManagement>
+
   <modules>
+    <module>api</module>
+    <module>backend</module>
     <module>webclient</module>
     <module>pentaho-app-shell-scheduler-assembly</module>
   </modules>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-checkstyle-plugin</artifactId>
+          <configuration>
+            <!-- exclude generated sources -->
+            <sourceDirectories>${project.build.sourceDirectory}</sourceDirectories>
+            <configLocation>
+              https://raw.githubusercontent.com/pentaho/pentaho-coding-standards/master/checkstyle/pentaho_checks.xml
+            </configLocation>
+            <violationSeverity>info</violationSeverity>
+            <consoleOutput>true</consoleOutput>
+            <includeTestSourceDirectory>true</includeTestSourceDirectory>
+            <linkXRef>false</linkXRef>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.openapitools</groupId>
+          <artifactId>openapi-generator-maven-plugin</artifactId>
+          <version>${openapi-generator-maven-plugin.version}</version>
+          <executions>
+            <execution>
+              <goals>
+                <goal>generate</goal>
+              </goals>
+              <phase>generate-sources</phase>
+              <configuration>
+                <generatorName>jaxrs-spec</generatorName>
+                <configOptions>
+                  <interfaceOnly>true</interfaceOnly>
+                  <returnResponse>true</returnResponse>
+                  <sourceFolder>src/java/main</sourceFolder>
+                  <useTags>true</useTags>
+                  <delegatePattern>false</delegatePattern>
+                  <skipDefaultInterface>true</skipDefaultInterface>
+                  <!-- remove unused import -->
+                  <!-- see https://github.com/OpenAPITools/openapi-generator/issues/2901#issuecomment-979365475 -->
+                  <openApiNullable>false</openApiNullable>
+                </configOptions>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-resources-plugin</artifactId>
+          <executions>
+            <execution>
+              <id>copy-resources</id>
+              <phase>process-resources</phase>
+              <goals>
+                <goal>copy-resources</goal>
+              </goals>
+              <configuration>
+                <outputDirectory>${project.build.directory}</outputDirectory>
+                <resources>
+                  <resource>
+                    <directory>src/main/resources-filtered</directory>
+                    <filtering>true</filtering>
+                    <includes>
+                      <include>${plugin.readme.file}</include>
+                    </includes>
+                  </resource>
+                </resources>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>build-helper-maven-plugin</artifactId>
+          <executions>
+            <execution>
+              <id>attach-artifacts</id>
+            </execution>
+            <execution>
+              <id>add-source</id>
+              <phase>generate-sources</phase>
+              <goals>
+                <goal>add-source</goal>
+              </goals>
+              <configuration>
+                <sources>
+                  <source>./target/generated-sources/openapi/src/java/main</source>
+                </sources>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <artifactId>maven-antrun-plugin</artifactId>
+          <version>${maven-antrun-plugin.version}</version>
+          <executions>
+            <execution>
+              <id>unzipIt</id>
+              <phase>install</phase>
+              <goals>
+                <goal>run</goal>
+              </goals>
+              <configuration>
+                <target>
+                  <echo message="Removing existing plugin from ${server.system.directory}"/>
+                  <!--suppress UnresolvedMavenProperty -->
+                  <delete includeemptydirs="true" dir="${server.system.directory}/${plugin.name}"/>
+                  <echo message="Unzipping plugin in ${server.system.directory}"/>
+                  <unzip src="${project.build.directory}/${project.artifactId}-${project.version}.zip"
+                         dest="${server.system.directory}"/>
+                </target>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+    <plugins>
+      <plugin>
+        <groupId>com.github.eirslett</groupId>
+        <artifactId>frontend-maven-plugin</artifactId>
+        <configuration>
+          <workingDirectory>.</workingDirectory>
+        </configuration>
+        <executions>
+          <execution>
+            <id>npm install</id>
+            <inherited>false</inherited>
+            <goals>
+              <goal>npm</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
 </project>
