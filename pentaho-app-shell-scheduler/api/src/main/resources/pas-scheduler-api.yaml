@@ -10,9 +10,9 @@ tags:
   - name: i-scheduler
     description: Scheduler operations
 paths:
-  /api/v1/scheduler/job:
+  /api/v1/scheduler/jobs:
     post:
-      summary: Creates or updates a scheduled job
+      summary: Create a scheduled job
       tags:
         - i-scheduler
       requestBody:
@@ -20,7 +20,7 @@ paths:
         content:
           application/xml:
             schema:
-              oneOf:
+              anyOf:
                 - $ref: '#/components/schemas/RunOnceJobScheduleRequest'
                 - $ref: '#/components/schemas/SecondsJobScheduleRequest'
                 - $ref: '#/components/schemas/DailyJobScheduleRequest'
@@ -30,7 +30,7 @@ paths:
                 - $ref: '#/components/schemas/YearlyJobScheduleRequest'
           application/json:
             schema:
-              oneOf:
+              anyOf:
                 - $ref: '#/components/schemas/RunOnceJobScheduleRequest'
                 - $ref: '#/components/schemas/SecondsJobScheduleRequest'
                 - $ref: '#/components/schemas/DailyJobScheduleRequest'
@@ -40,23 +40,198 @@ paths:
                 - $ref: '#/components/schemas/YearlyJobScheduleRequest'
       responses:
         '200':
-          description: Schedule created or updated successfully
+          description: Schedule created successfully
           content:
             text/plain:
               schema:
                 type: string
         '401':
-          description: User is not authorized to create or update schedules
+          description: User is not authorized to create schedules
         '403':
             description: Cannot create schedules for the specified file
         '500':
-          description: An error occurred while creating or updating a schedule
-
-  /api/v1/scheduler/triggerNow:
+          description: An error occurred while creating a schedule
+    get:
+      summary: Retrieve all scheduled jobs visible to the current user
+      tags:
+        - i-scheduler
+      responses:
+        '200':
+          description: Jobs retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  anyOf:
+                    - $ref: '#/components/schemas/RunOnceJobScheduleRequest'
+                    - $ref: '#/components/schemas/SecondsJobScheduleRequest'
+                    - $ref: '#/components/schemas/DailyJobScheduleRequest'
+                    - $ref: '#/components/schemas/CronJobScheduleRequest'
+                    - $ref: '#/components/schemas/WeeklyJobScheduleRequest'
+                    - $ref: '#/components/schemas/MonthlyJobScheduleRequest'
+                    - $ref: '#/components/schemas/YearlyJobScheduleRequest'
+            application/xml:
+              schema:
+                type: array
+                items:
+                  anyOf:
+                    - $ref: '#/components/schemas/RunOnceJobScheduleRequest'
+                    - $ref: '#/components/schemas/SecondsJobScheduleRequest'
+                    - $ref: '#/components/schemas/DailyJobScheduleRequest'
+                    - $ref: '#/components/schemas/CronJobScheduleRequest'
+                    - $ref: '#/components/schemas/WeeklyJobScheduleRequest'
+                    - $ref: '#/components/schemas/MonthlyJobScheduleRequest'
+                    - $ref: '#/components/schemas/YearlyJobScheduleRequest'
+        '500':
+          description: Error while retrieving jobs
+    delete:
+      summary: Delete multiple scheduled jobs
+      tags:
+        - i-scheduler
+      requestBody:
+        required: true
+        content:
+          application/xml:
+            schema:
+              type: array
+              items:
+                type: string
+          application/json:
+            schema:
+              type: array
+              items:
+                type: string
+      responses:
+        '200':
+          description: Jobs deleted successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/JobStatusResponse'
+            application/xml:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/JobStatusResponse'
+        '500':
+          description: Invalid request or server error
+  /api/v1/scheduler/jobs/{jobId}:
+    get:
+      summary: Return the information for a specified job
+      tags:
+        - i-scheduler
+      parameters:
+        - in: path
+          name: jobId
+          schema: { type: string }
+          required: true
+        - in: query
+          name: asCronString
+          schema: { type: string }
+          required: false
+      responses:
+        '200':
+          description: Job info retrieved
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/RunOnceJobScheduleRequest'
+                  - $ref: '#/components/schemas/SecondsJobScheduleRequest'
+                  - $ref: '#/components/schemas/DailyJobScheduleRequest'
+                  - $ref: '#/components/schemas/CronJobScheduleRequest'
+                  - $ref: '#/components/schemas/WeeklyJobScheduleRequest'
+                  - $ref: '#/components/schemas/MonthlyJobScheduleRequest'
+                  - $ref: '#/components/schemas/YearlyJobScheduleRequest'
+            application/xml:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/RunOnceJobScheduleRequest'
+                  - $ref: '#/components/schemas/SecondsJobScheduleRequest'
+                  - $ref: '#/components/schemas/DailyJobScheduleRequest'
+                  - $ref: '#/components/schemas/CronJobScheduleRequest'
+                  - $ref: '#/components/schemas/WeeklyJobScheduleRequest'
+                  - $ref: '#/components/schemas/MonthlyJobScheduleRequest'
+                  - $ref: '#/components/schemas/YearlyJobScheduleRequest'
+        '204':
+          description: Job does not exist
+        '500':
+          description: Internal error or invalid jobId
+    put:
+      summary: Update a scheduled job
+      tags:
+        - i-scheduler
+      parameters:
+        - in: path
+          name: jobId
+          schema: { type: string }
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/xml:
+            schema:
+              anyOf:
+                - $ref: '#/components/schemas/RunOnceJobScheduleRequest'
+                - $ref: '#/components/schemas/SecondsJobScheduleRequest'
+                - $ref: '#/components/schemas/DailyJobScheduleRequest'
+                - $ref: '#/components/schemas/CronJobScheduleRequest'
+                - $ref: '#/components/schemas/WeeklyJobScheduleRequest'
+                - $ref: '#/components/schemas/MonthlyJobScheduleRequest'
+                - $ref: '#/components/schemas/YearlyJobScheduleRequest'
+          application/json:
+            schema:
+              anyOf:
+                - $ref: '#/components/schemas/RunOnceJobScheduleRequest'
+                - $ref: '#/components/schemas/SecondsJobScheduleRequest'
+                - $ref: '#/components/schemas/DailyJobScheduleRequest'
+                - $ref: '#/components/schemas/CronJobScheduleRequest'
+                - $ref: '#/components/schemas/WeeklyJobScheduleRequest'
+                - $ref: '#/components/schemas/MonthlyJobScheduleRequest'
+                - $ref: '#/components/schemas/YearlyJobScheduleRequest'
+      responses:
+        '200':
+          description: Schedule updated successfully
+          content:
+            text/plain:
+              schema:
+                type: string
+        '401':
+          description: User is not authorized to update schedules
+        '403':
+            description: Cannot update schedules for the specified file
+        '500':
+          description: An error occurred while updating a schedule
+    delete:
+      summary: Delete the specified scheduled job
+      tags:
+        - i-scheduler
+      parameters:
+        - in: path
+          name: jobId
+          schema: { type: string }
+          required: true
+      responses:
+        '200':
+          description: Job removed
+          content:
+            text/plain:
+              schema: { type: string }
+        '500':
+          description: Invalid jobId
+  /api/v1/scheduler/jobs/{jobId}/trigger:
     post:
       summary: Execute a previously scheduled job
       tags:
         - i-scheduler
+      parameters:
+        - in: path
+          name: jobId
+          schema: { type: string }
+          required: true
       requestBody:
         required: true
         content:
@@ -75,8 +250,61 @@ paths:
           description: Invalid input
         '500':
           description: Invalid jobId
-
-  /api/v1/scheduler/getContentCleanerJob:
+  /api/v1/scheduler/jobs/{jobId}/state:
+    get:
+      summary: Checks the state of the selected scheduled job
+      tags:
+        - i-scheduler
+      parameters:
+        - in: path
+          name: jobId
+          schema: { type: string }
+          required: true
+      responses:
+        '200':
+          description: Job state retrieved
+          content:
+            text/plain:
+              schema: { type: string }
+        '500':
+          description: Invalid jobId
+  /api/v1/scheduler/jobs/{jobId}/pause:
+    patch:
+      summary: Pause the specified scheduled job
+      tags:
+        - i-scheduler
+      parameters:
+        - in: path
+          name: jobId
+          schema: { type: string }
+          required: true
+      responses:
+        '200':
+          description: Job paused
+          content:
+            text/plain:
+              schema: { type: string }
+        '500':
+          description: Invalid jobId
+  /api/v1/scheduler/jobs/{jobId}/resume:
+    patch:
+      summary: Resume the specified scheduled job
+      tags:
+        - i-scheduler
+      parameters:
+        - in: path
+          name: jobId
+          schema: { type: string }
+          required: true
+      responses:
+        '200':
+          description: Job resumed
+          content:
+            text/plain:
+              schema: { type: string }
+        '500':
+          description: Invalid jobId
+  /api/v1/scheduler/content-cleaner-job:
     get:
       summary: Get the scheduled job for deleting generated files
       tags:
@@ -87,7 +315,7 @@ paths:
           content:
             application/xml:
               schema:
-                oneOf:
+                anyOf:
                   - $ref: '#/components/schemas/RunOnceJobScheduleRequest'
                   - $ref: '#/components/schemas/SecondsJobScheduleRequest'
                   - $ref: '#/components/schemas/DailyJobScheduleRequest'
@@ -97,7 +325,7 @@ paths:
                   - $ref: '#/components/schemas/YearlyJobScheduleRequest'
             application/json:
               schema:
-                oneOf:
+                anyOf:
                   - $ref: '#/components/schemas/RunOnceJobScheduleRequest'
                   - $ref: '#/components/schemas/SecondsJobScheduleRequest'
                   - $ref: '#/components/schemas/DailyJobScheduleRequest'
@@ -107,44 +335,42 @@ paths:
                   - $ref: '#/components/schemas/YearlyJobScheduleRequest'
         '204':
           description: No content cleaner job exists
-
-  /api/v1/scheduler/getJobs:
+  /api/v1/scheduler/state:
     get:
-      summary: Retrieve all scheduled jobs visible to the current user
+      summary: Returns the state of the scheduler
       tags:
         - i-scheduler
       responses:
         '200':
-          description: Jobs retrieved successfully
+          description: Scheduler state retrieved
           content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  oneOf:
-                    - $ref: '#/components/schemas/RunOnceJobScheduleRequest'
-                    - $ref: '#/components/schemas/SecondsJobScheduleRequest'
-                    - $ref: '#/components/schemas/DailyJobScheduleRequest'
-                    - $ref: '#/components/schemas/CronJobScheduleRequest'
-                    - $ref: '#/components/schemas/WeeklyJobScheduleRequest'
-                    - $ref: '#/components/schemas/MonthlyJobScheduleRequest'
-                    - $ref: '#/components/schemas/YearlyJobScheduleRequest'
-            application/xml:
-              schema:
-                type: array
-                items:
-                  oneOf:
-                    - $ref: '#/components/schemas/RunOnceJobScheduleRequest'
-                    - $ref: '#/components/schemas/SecondsJobScheduleRequest'
-                    - $ref: '#/components/schemas/DailyJobScheduleRequest'
-                    - $ref: '#/components/schemas/CronJobScheduleRequest'
-                    - $ref: '#/components/schemas/WeeklyJobScheduleRequest'
-                    - $ref: '#/components/schemas/MonthlyJobScheduleRequest'
-                    - $ref: '#/components/schemas/YearlyJobScheduleRequest'
+            text/plain:
+              schema: { type: string }
         '500':
-          description: Error while retrieving jobs
-
-  /api/v1/scheduler/isScheduleAllowed:
+          description: Error getting scheduler state
+    patch:
+      summary: Change the state of the scheduler (start, pause, shutdown)
+      tags:
+        - i-scheduler
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                state:
+                  type: string
+                  enum: [running, paused, shutdown]
+      responses:
+        '200':
+          description: Scheduler state updated
+          content:
+            text/plain:
+              schema: { type: string }
+        '500':
+          description: Error updating scheduler state
+  /api/v1/scheduler/jobs/schedule-allowed:
     get:
       summary: Checks whether the current user may schedule a repository file
       tags:
@@ -162,8 +388,7 @@ paths:
               schema: { type: string }
         '500':
           description: Invalid repository file id
-
-  /api/v1/scheduler/canSchedule:
+  /api/v1/scheduler/jobs/can-schedule:
     get:
       summary: Checks whether the current user can schedule any content
       tags:
@@ -176,8 +401,7 @@ paths:
               schema: { type: string }
         '500':
           description: Unable to retrieve the scheduling permission
-
-  /api/v1/scheduler/canExecuteSchedules:
+  /api/v1/scheduler/jobs/can-execute:
     get:
       summary: Checks whether the current user can execute schedules
       tags:
@@ -190,226 +414,29 @@ paths:
               schema: { type: string }
         '500':
           description: Unable to retrieve the scheduling permission
-
-  /api/v1/scheduler/state:
+  /api/v1/scheduler/jobs/{jobId}/generated-content:
     get:
-      summary: Returns the state of the scheduler
-      tags:
-        - i-scheduler
-      responses:
-        '200':
-          description: Scheduler state retrieved
-          content:
-            text/plain:
-              schema: { type: string }
-        '500':
-          description: Error getting scheduler state
-
-  /api/v1/scheduler/start:
-    post:
-      summary: Resume the scheduler from a paused state
-      tags:
-        - i-scheduler
-      responses:
-        '200':
-          description: Scheduler started
-          content:
-            text/plain:
-              schema: { type: string }
-        '500':
-          description: Error resuming scheduler
-
-  /api/v1/scheduler/pause:
-    post:
-      summary: Pause the scheduler from a running state
-      tags:
-        - i-scheduler
-      responses:
-        '200':
-          description: Scheduler paused
-          content:
-            text/plain:
-              schema: { type: string }
-        '500':
-          description: Error pausing scheduler
-
-  /api/v1/scheduler/shutdown:
-    post:
-      summary: Shuts down the scheduler
-      tags:
-        - i-scheduler
-      responses:
-        '200':
-          description: Scheduler shut down
-          content:
-            text/plain:
-              schema: { type: string }
-        '500':
-          description: Error shutting down scheduler
-
-  /api/v1/scheduler/jobState:
-    post:
-      summary: Checks the state of the selected scheduled job
-      tags:
-        - i-scheduler
-      requestBody:
-        required: true
-        content:
-          application/xml:
-            schema: { type: string }
-          application/json:
-            schema: { type: string }
-      responses:
-        '200':
-          description: Job state retrieved
-          content:
-            text/plain:
-              schema: { type: string }
-        '500':
-          description: Invalid jobId
-
-  /api/v1/scheduler/pauseJob:
-    post:
-      summary: Pause the specified scheduled job
-      tags:
-        - i-scheduler
-      requestBody:
-        required: true
-        content:
-          application/xml:
-            schema: { type: string }
-          application/json:
-            schema: { type: string }
-      responses:
-        '200':
-          description: Job paused
-          content:
-            text/plain:
-              schema: { type: string }
-        '500':
-          description: Invalid jobId
-
-  /api/v1/scheduler/resumeJob:
-    post:
-      summary: Resume the specified scheduled job
-      tags:
-        - i-scheduler
-      requestBody:
-        required: true
-        content:
-          application/xml:
-            schema: { type: string }
-          application/json:
-            schema: { type: string }
-      responses:
-        '200':
-          description: Job resumed
-          content:
-            text/plain:
-              schema: { type: string }
-        '500':
-          description: Invalid jobId
-
-  /api/v1/scheduler/removeJob:
-    put:
-      summary: Delete the specified scheduled job
-      tags:
-        - i-scheduler
-      requestBody:
-        required: true
-        content:
-          application/xml:
-            schema: { type: string }
-          application/json:
-            schema: { type: string }
-      responses:
-        '200':
-          description: Job removed
-          content:
-            text/plain:
-              schema: { type: string }
-        '500':
-          description: Invalid jobId
-
-  /api/v1/scheduler/removeJobs:
-    post:
-      summary: Deletes all the specified scheduled jobs
-      tags:
-        - i-scheduler
-      requestBody:
-        required: true
-        content:
-          application/xml:
-            schema:
-              type: array
-              items:
-                type: string
-          application/json:
-            schema:
-              type: array
-              items:
-                type: string
-      responses:
-        '200':
-          description: Jobs new states returned
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/JobStatusResponse'
-            application/xml:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/JobStatusResponse'
-        '500':
-          description: Invalid request or server error
-
-  /api/v1/scheduler/jobinfo:
-    get:
-      summary: Return the information for a specified job
+      summary: Retrieve the list of execute content by job id
       tags:
         - i-scheduler
       parameters:
-        - in: query
+        - in: path
           name: jobId
           schema: { type: string }
           required: true
-        - in: query
-          name: asCronString
-          schema: { type: string }
-          required: false
       responses:
         '200':
-          description: Job info retrieved
+          description: Generated content for schedule
           content:
             application/json:
               schema:
-                oneOf:
-                  - $ref: '#/components/schemas/RunOnceJobScheduleRequest'
-                  - $ref: '#/components/schemas/SecondsJobScheduleRequest'
-                  - $ref: '#/components/schemas/DailyJobScheduleRequest'
-                  - $ref: '#/components/schemas/CronJobScheduleRequest'
-                  - $ref: '#/components/schemas/WeeklyJobScheduleRequest'
-                  - $ref: '#/components/schemas/MonthlyJobScheduleRequest'
-                  - $ref: '#/components/schemas/YearlyJobScheduleRequest'
+                type: array
+                items: { $ref: '#/components/schemas/RepositoryFileDto' }
             application/xml:
               schema:
-                oneOf:
-                  - $ref: '#/components/schemas/RunOnceJobScheduleRequest'
-                  - $ref: '#/components/schemas/SecondsJobScheduleRequest'
-                  - $ref: '#/components/schemas/DailyJobScheduleRequest'
-                  - $ref: '#/components/schemas/CronJobScheduleRequest'
-                  - $ref: '#/components/schemas/WeeklyJobScheduleRequest'
-                  - $ref: '#/components/schemas/MonthlyJobScheduleRequest'
-                  - $ref: '#/components/schemas/YearlyJobScheduleRequest'
-        '204':
-          description: Job does not exist
-        '500':
-          description: Internal error or invalid jobId
-
-  /api/v1/scheduler/blockout/blockoutjobs:
+                type: array
+                items: { $ref: '#/components/schemas/RepositoryFileDto' }
+  /api/v1/scheduler/blockouts:
     get:
       summary: Get all the blockout jobs in the system
       tags:
@@ -422,7 +449,7 @@ paths:
               schema:
                 type: array
                 items:
-                  oneOf:
+                  anyOf:
                     - $ref: '#/components/schemas/RunOnceJobScheduleRequest'
                     - $ref: '#/components/schemas/SecondsJobScheduleRequest'
                     - $ref: '#/components/schemas/DailyJobScheduleRequest'
@@ -434,7 +461,7 @@ paths:
               schema:
                 type: array
                 items:
-                  oneOf:
+                  anyOf:
                     - $ref: '#/components/schemas/RunOnceJobScheduleRequest'
                     - $ref: '#/components/schemas/SecondsJobScheduleRequest'
                     - $ref: '#/components/schemas/DailyJobScheduleRequest'
@@ -444,20 +471,6 @@ paths:
                     - $ref: '#/components/schemas/YearlyJobScheduleRequest'
         '500':
           description: Error while retrieving blockout jobs
-
-  /api/v1/scheduler/blockout/hasblockouts:
-    get:
-      summary: Checks if there are blockouts in the system
-      tags:
-        - i-scheduler
-      responses:
-        '200':
-          description: Blockout status
-          content:
-            text/plain:
-              schema: { type: string }
-
-  /api/v1/scheduler/blockout/add:
     post:
       summary: Creates a new blockout for scheduled jobs
       tags:
@@ -467,7 +480,7 @@ paths:
         content:
           application/xml:
             schema:
-              oneOf:
+              anyOf:
                 - $ref: '#/components/schemas/RunOnceJobScheduleRequest'
                 - $ref: '#/components/schemas/SecondsJobScheduleRequest'
                 - $ref: '#/components/schemas/DailyJobScheduleRequest'
@@ -477,7 +490,7 @@ paths:
                 - $ref: '#/components/schemas/YearlyJobScheduleRequest'
           application/json:
             schema:
-              oneOf:
+              anyOf:
                 - $ref: '#/components/schemas/RunOnceJobScheduleRequest'
                 - $ref: '#/components/schemas/SecondsJobScheduleRequest'
                 - $ref: '#/components/schemas/DailyJobScheduleRequest'
@@ -493,8 +506,18 @@ paths:
               schema: { type: string }
         '401':
           description: Not authorized
-
-  /api/v1/scheduler/blockout/willFire:
+  /api/v1/scheduler/blockouts/exists:
+    get:
+      summary: Checks if there are blockouts in the system
+      tags:
+        - i-scheduler
+      responses:
+        '200':
+          description: Blockout status
+          content:
+            text/plain:
+              schema: { type: string }
+  /api/v1/scheduler/blockouts/will-fire:
     post:
       summary: Checks if the selected blockout schedule will be fired
       tags:
@@ -504,7 +527,7 @@ paths:
         content:
           application/xml:
             schema:
-              oneOf:
+              anyOf:
                 - $ref: '#/components/schemas/RunOnceJobScheduleRequest'
                 - $ref: '#/components/schemas/SecondsJobScheduleRequest'
                 - $ref: '#/components/schemas/DailyJobScheduleRequest'
@@ -514,7 +537,7 @@ paths:
                 - $ref: '#/components/schemas/YearlyJobScheduleRequest'
           application/json:
             schema:
-              oneOf:
+              anyOf:
                 - $ref: '#/components/schemas/RunOnceJobScheduleRequest'
                 - $ref: '#/components/schemas/SecondsJobScheduleRequest'
                 - $ref: '#/components/schemas/DailyJobScheduleRequest'
@@ -530,8 +553,7 @@ paths:
               schema: { type: string }
         '500':
           description: Error determining blockout firing
-
-  /api/v1/scheduler/blockout/shouldFireNow:
+  /api/v1/scheduler/blockouts/should-fire-now:
     get:
       summary: Checks if the selected blockout schedule should be fired now
       tags:
@@ -542,8 +564,7 @@ paths:
           content:
             text/plain:
               schema: { type: string }
-
-  /api/v1/scheduler/blockout/blockstatus:
+  /api/v1/scheduler/blockouts/status:
     post:
       summary: Check the status of the selected blockout schedule
       tags:
@@ -553,7 +574,7 @@ paths:
         content:
           application/xml:
             schema:
-              oneOf:
+              anyOf:
                 - $ref: '#/components/schemas/RunOnceJobScheduleRequest'
                 - $ref: '#/components/schemas/SecondsJobScheduleRequest'
                 - $ref: '#/components/schemas/DailyJobScheduleRequest'
@@ -563,7 +584,7 @@ paths:
                 - $ref: '#/components/schemas/YearlyJobScheduleRequest'
           application/json:
             schema:
-              oneOf:
+              anyOf:
                 - $ref: '#/components/schemas/RunOnceJobScheduleRequest'
                 - $ref: '#/components/schemas/SecondsJobScheduleRequest'
                 - $ref: '#/components/schemas/DailyJobScheduleRequest'
@@ -581,30 +602,6 @@ paths:
               schema: { $ref: '#/components/schemas/BlockStatusProxy' }
         '401':
           description: Not authorized
-
-  /api/v1/scheduler/generatedContentForSchedule:
-    get:
-      summary: Retrieve the list of execute content by lineage id
-      tags:
-        - i-scheduler
-      parameters:
-        - in: query
-          name: lineageId
-          schema: { type: string }
-          required: true
-      responses:
-        '200':
-          description: Generated content for schedule
-          content:
-            application/json:
-              schema:
-                type: array
-                items: { $ref: '#/components/schemas/RepositoryFileDto' }
-            application/xml:
-              schema:
-                type: array
-                items: { $ref: '#/components/schemas/RepositoryFileDto' }
-
 components:
   schemas:
 
