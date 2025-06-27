@@ -249,6 +249,7 @@
               <inputSpec>pas-scheduler-api.yaml</inputSpec>
               <apiPackage>com.pentaho.appshell.scheduler.api</apiPackage>
               <modelPackage>com.pentaho.appshell.scheduler.model</modelPackage>
+              <openapiNormalizer>REF_AS_PARENT_IN_ALLOF=true</openapiNormalizer>
 <!--              <schemaMappings>-->
 <!--                ErrorBase=com.pentaho.problemdetails.ErrorBase,-->
 <!--                Problem=com.pentaho.problemdetails.Problem,-->
