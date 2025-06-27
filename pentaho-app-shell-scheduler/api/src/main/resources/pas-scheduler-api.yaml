@@ -1,4 +1,4 @@
-openapi: 3.0.1
+openapi: 3.1.0
 info:
   title: Pentaho Scheduler API
   version: 1.0.0
@@ -13,6 +13,7 @@ paths:
   /api/v1/scheduler/jobs:
     post:
       summary: Create a scheduled job
+      operationId: createJobSchedule
       tags:
         - i-scheduler
       requestBody:
@@ -20,44 +21,10 @@ paths:
         content:
           application/xml:
             schema:
-              anyOf:
-                - $ref: "#/components/schemas/RunOnceJobScheduleRequest"
-                - $ref: "#/components/schemas/SecondsJobScheduleRequest"
-                - $ref: "#/components/schemas/DailyJobScheduleRequest"
-                - $ref: "#/components/schemas/CronJobScheduleRequest"
-                - $ref: "#/components/schemas/WeeklyJobScheduleRequest"
-                - $ref: "#/components/schemas/MonthlyJobScheduleRequest"
-                - $ref: "#/components/schemas/YearlyJobScheduleRequest"
-              discriminator:
-                propertyName: uiPassParam
-                mapping:
-                  RUN_ONCE: "#/components/schemas/RunOnceJobScheduleRequest"
-                  SECONDS: "#/components/schemas/SecondsJobScheduleRequest"
-                  DAILY: "#/components/schemas/DailyJobScheduleRequest"
-                  WEEKLY: "#/components/schemas/WeeklyJobScheduleRequest"
-                  MONTHLY: "#/components/schemas/MonthlyJobScheduleRequest"
-                  YEARLY: "#/components/schemas/YearlyJobScheduleRequest"
-                  CRON: "#/components/schemas/CronJobScheduleRequest"
+              $ref: "#/components/schemas/BaseJob"
           application/json:
             schema:
-              anyOf:
-                - $ref: "#/components/schemas/RunOnceJobScheduleRequest"
-                - $ref: "#/components/schemas/SecondsJobScheduleRequest"
-                - $ref: "#/components/schemas/DailyJobScheduleRequest"
-                - $ref: "#/components/schemas/CronJobScheduleRequest"
-                - $ref: "#/components/schemas/WeeklyJobScheduleRequest"
-                - $ref: "#/components/schemas/MonthlyJobScheduleRequest"
-                - $ref: "#/components/schemas/YearlyJobScheduleRequest"
-              discriminator:
-                propertyName: uiPassParam
-                mapping:
-                  RUN_ONCE: "#/components/schemas/RunOnceJobScheduleRequest"
-                  SECONDS: "#/components/schemas/SecondsJobScheduleRequest"
-                  DAILY: "#/components/schemas/DailyJobScheduleRequest"
-                  WEEKLY: "#/components/schemas/WeeklyJobScheduleRequest"
-                  MONTHLY: "#/components/schemas/MonthlyJobScheduleRequest"
-                  YEARLY: "#/components/schemas/YearlyJobScheduleRequest"
-                  CRON: "#/components/schemas/CronJobScheduleRequest"
+              $ref: "#/components/schemas/BaseJob"
       responses:
         "200":
           description: Schedule created successfully
@@ -73,6 +40,7 @@ paths:
           description: An error occurred while creating a schedule
     get:
       summary: Retrieve all scheduled jobs visible to the current user
+      operationId: getAllScheduledJobs
       tags:
         - i-scheduler
       responses:
@@ -83,50 +51,17 @@ paths:
               schema:
                 type: array
                 items:
-                  anyOf:
-                    - $ref: "#/components/schemas/RunOnceJobScheduleRequest"
-                    - $ref: "#/components/schemas/SecondsJobScheduleRequest"
-                    - $ref: "#/components/schemas/DailyJobScheduleRequest"
-                    - $ref: "#/components/schemas/CronJobScheduleRequest"
-                    - $ref: "#/components/schemas/WeeklyJobScheduleRequest"
-                    - $ref: "#/components/schemas/MonthlyJobScheduleRequest"
-                    - $ref: "#/components/schemas/YearlyJobScheduleRequest"
-                  discriminator:
-                    propertyName: uiPassParam
-                    mapping:
-                      RUN_ONCE: "#/components/schemas/RunOnceJobScheduleRequest"
-                      SECONDS: "#/components/schemas/SecondsJobScheduleRequest"
-                      DAILY: "#/components/schemas/DailyJobScheduleRequest"
-                      WEEKLY: "#/components/schemas/WeeklyJobScheduleRequest"
-                      MONTHLY: "#/components/schemas/MonthlyJobScheduleRequest"
-                      YEARLY: "#/components/schemas/YearlyJobScheduleRequest"
-                      CRON: "#/components/schemas/CronJobScheduleRequest"
+                  $ref: "#/components/schemas/BaseJob"
             application/xml:
               schema:
                 type: array
                 items:
-                  anyOf:
-                    - $ref: "#/components/schemas/RunOnceJobScheduleRequest"
-                    - $ref: "#/components/schemas/SecondsJobScheduleRequest"
-                    - $ref: "#/components/schemas/DailyJobScheduleRequest"
-                    - $ref: "#/components/schemas/CronJobScheduleRequest"
-                    - $ref: "#/components/schemas/WeeklyJobScheduleRequest"
-                    - $ref: "#/components/schemas/MonthlyJobScheduleRequest"
-                    - $ref: "#/components/schemas/YearlyJobScheduleRequest"
-                  discriminator:
-                    propertyName: uiPassParam
-                    mapping:
-                      RUN_ONCE: "#/components/schemas/RunOnceJobScheduleRequest"
-                      SECONDS: "#/components/schemas/SecondsJobScheduleRequest"
-                      DAILY: "#/components/schemas/DailyJobScheduleRequest"
-                      WEEKLY: "#/components/schemas/WeeklyJobScheduleRequest"
-                      MONTHLY: "#/components/schemas/MonthlyJobScheduleRequest"
-                      YEARLY: "#/components/schemas/YearlyJobScheduleRequest"
-                      CRON: "#/components/schemas/CronJobScheduleRequest"
+                  $ref: "#/components/schemas/BaseJob"
         "500":
           description: Error while retrieving jobs
     delete:
       summary: Delete multiple scheduled jobs
+      operationId: deleteMultipleScheduledJobs
       tags:
         - i-scheduler
       requestBody:
@@ -161,6 +96,7 @@ paths:
   /api/v1/scheduler/jobs/{jobId}:
     get:
       summary: Return the information for a specified job
+      operationId: getScheduledJobById
       tags:
         - i-scheduler
       parameters:
@@ -178,30 +114,17 @@ paths:
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: "#/components/schemas/RunOnceJobScheduleRequest"
-                  - $ref: "#/components/schemas/SecondsJobScheduleRequest"
-                  - $ref: "#/components/schemas/DailyJobScheduleRequest"
-                  - $ref: "#/components/schemas/CronJobScheduleRequest"
-                  - $ref: "#/components/schemas/WeeklyJobScheduleRequest"
-                  - $ref: "#/components/schemas/MonthlyJobScheduleRequest"
-                  - $ref: "#/components/schemas/YearlyJobScheduleRequest"
+                $ref: "#/components/schemas/BaseJob"
             application/xml:
               schema:
-                anyOf:
-                  - $ref: "#/components/schemas/RunOnceJobScheduleRequest"
-                  - $ref: "#/components/schemas/SecondsJobScheduleRequest"
-                  - $ref: "#/components/schemas/DailyJobScheduleRequest"
-                  - $ref: "#/components/schemas/CronJobScheduleRequest"
-                  - $ref: "#/components/schemas/WeeklyJobScheduleRequest"
-                  - $ref: "#/components/schemas/MonthlyJobScheduleRequest"
-                  - $ref: "#/components/schemas/YearlyJobScheduleRequest"
+                $ref: "#/components/schemas/BaseJob"
         "204":
           description: Job does not exist
         "500":
           description: Internal error or invalid jobId
     put:
       summary: Update a scheduled job
+      operationId: updateScheduledJob
       tags:
         - i-scheduler
       parameters:
@@ -214,24 +137,10 @@ paths:
         content:
           application/xml:
             schema:
-              anyOf:
-                - $ref: "#/components/schemas/RunOnceJobScheduleRequest"
-                - $ref: "#/components/schemas/SecondsJobScheduleRequest"
-                - $ref: "#/components/schemas/DailyJobScheduleRequest"
-                - $ref: "#/components/schemas/CronJobScheduleRequest"
-                - $ref: "#/components/schemas/WeeklyJobScheduleRequest"
-                - $ref: "#/components/schemas/MonthlyJobScheduleRequest"
-                - $ref: "#/components/schemas/YearlyJobScheduleRequest"
+              $ref: "#/components/schemas/BaseJob"
           application/json:
             schema:
-              anyOf:
-                - $ref: "#/components/schemas/RunOnceJobScheduleRequest"
-                - $ref: "#/components/schemas/SecondsJobScheduleRequest"
-                - $ref: "#/components/schemas/DailyJobScheduleRequest"
-                - $ref: "#/components/schemas/CronJobScheduleRequest"
-                - $ref: "#/components/schemas/WeeklyJobScheduleRequest"
-                - $ref: "#/components/schemas/MonthlyJobScheduleRequest"
-                - $ref: "#/components/schemas/YearlyJobScheduleRequest"
+              $ref: "#/components/schemas/BaseJob"
       responses:
         "200":
           description: Schedule updated successfully
@@ -247,6 +156,7 @@ paths:
           description: An error occurred while updating a schedule
     delete:
       summary: Delete the specified scheduled job
+      operationId: deleteScheduledJobById
       tags:
         - i-scheduler
       parameters:
@@ -265,6 +175,7 @@ paths:
   /api/v1/scheduler/jobs/{jobId}/trigger:
     post:
       summary: Execute a previously scheduled job
+      operationId: triggerScheduledJob
       tags:
         - i-scheduler
       parameters:
@@ -293,6 +204,7 @@ paths:
   /api/v1/scheduler/jobs/{jobId}/state:
     get:
       summary: Checks the state of the selected scheduled job
+      operationId: getScheduledJobState
       tags:
         - i-scheduler
       parameters:
@@ -309,8 +221,9 @@ paths:
         "500":
           description: Invalid jobId
   /api/v1/scheduler/jobs/{jobId}/pause:
-    patch:
+    post:
       summary: Pause the specified scheduled job
+      operationId: pauseScheduledJob
       tags:
         - i-scheduler
       parameters:
@@ -327,8 +240,9 @@ paths:
         "500":
           description: Invalid jobId
   /api/v1/scheduler/jobs/{jobId}/resume:
-    patch:
+    post:
       summary: Resume the specified scheduled job
+      operationId: resumeScheduledJob
       tags:
         - i-scheduler
       parameters:
@@ -347,6 +261,7 @@ paths:
   /api/v1/scheduler/content-cleaner-job:
     get:
       summary: Get the scheduled job for deleting generated files
+      operationId: getContentCleanerJob
       tags:
         - i-scheduler
       responses:
@@ -355,29 +270,16 @@ paths:
           content:
             application/xml:
               schema:
-                anyOf:
-                  - $ref: "#/components/schemas/RunOnceJobScheduleRequest"
-                  - $ref: "#/components/schemas/SecondsJobScheduleRequest"
-                  - $ref: "#/components/schemas/DailyJobScheduleRequest"
-                  - $ref: "#/components/schemas/CronJobScheduleRequest"
-                  - $ref: "#/components/schemas/WeeklyJobScheduleRequest"
-                  - $ref: "#/components/schemas/MonthlyJobScheduleRequest"
-                  - $ref: "#/components/schemas/YearlyJobScheduleRequest"
+                $ref: "#/components/schemas/BaseJob"
             application/json:
               schema:
-                anyOf:
-                  - $ref: "#/components/schemas/RunOnceJobScheduleRequest"
-                  - $ref: "#/components/schemas/SecondsJobScheduleRequest"
-                  - $ref: "#/components/schemas/DailyJobScheduleRequest"
-                  - $ref: "#/components/schemas/CronJobScheduleRequest"
-                  - $ref: "#/components/schemas/WeeklyJobScheduleRequest"
-                  - $ref: "#/components/schemas/MonthlyJobScheduleRequest"
-                  - $ref: "#/components/schemas/YearlyJobScheduleRequest"
+                $ref: "#/components/schemas/BaseJob"
         "204":
           description: No content cleaner job exists
   /api/v1/scheduler/state:
     get:
       summary: Returns the state of the scheduler
+      operationId: getSchedulerState
       tags:
         - i-scheduler
       responses:
@@ -388,8 +290,9 @@ paths:
               schema: { type: string }
         "500":
           description: Error getting scheduler state
-    patch:
+    post:
       summary: Change the state of the scheduler (start, pause, shutdown)
+      operationId: setSchedulerState
       tags:
         - i-scheduler
       requestBody:
@@ -413,6 +316,7 @@ paths:
   /api/v1/scheduler/jobs/schedule-allowed:
     get:
       summary: Checks whether the current user may schedule a repository file
+      operationId: isScheduleAllowedForFile
       tags:
         - i-scheduler
       parameters:
@@ -431,6 +335,7 @@ paths:
   /api/v1/scheduler/jobs/can-schedule:
     get:
       summary: Checks whether the current user can schedule any content
+      operationId: canUserScheduleAnyContent
       tags:
         - i-scheduler
       responses:
@@ -444,6 +349,7 @@ paths:
   /api/v1/scheduler/jobs/can-execute:
     get:
       summary: Checks whether the current user can execute schedules
+      operationId: canUserExecuteSchedules
       tags:
         - i-scheduler
       responses:
@@ -457,6 +363,7 @@ paths:
   /api/v1/scheduler/jobs/{jobId}/generated-content:
     get:
       summary: Retrieve the list of execute content by job id
+      operationId: getGeneratedContentByJobId
       tags:
         - i-scheduler
       parameters:
@@ -479,6 +386,7 @@ paths:
   /api/v1/scheduler/blockouts:
     get:
       summary: Get all the blockout jobs in the system
+      operationId: getAllBlockoutJobs
       tags:
         - i-scheduler
       responses:
@@ -489,50 +397,17 @@ paths:
               schema:
                 type: array
                 items:
-                  anyOf:
-                    - $ref: "#/components/schemas/RunOnceJobScheduleRequest"
-                    - $ref: "#/components/schemas/SecondsJobScheduleRequest"
-                    - $ref: "#/components/schemas/DailyJobScheduleRequest"
-                    - $ref: "#/components/schemas/CronJobScheduleRequest"
-                    - $ref: "#/components/schemas/WeeklyJobScheduleRequest"
-                    - $ref: "#/components/schemas/MonthlyJobScheduleRequest"
-                    - $ref: "#/components/schemas/YearlyJobScheduleRequest"
-                  discriminator:
-                    propertyName: uiPassParam
-                    mapping:
-                      RUN_ONCE: "#/components/schemas/RunOnceJobScheduleRequest"
-                      SECONDS: "#/components/schemas/SecondsJobScheduleRequest"
-                      DAILY: "#/components/schemas/DailyJobScheduleRequest"
-                      WEEKLY: "#/components/schemas/WeeklyJobScheduleRequest"
-                      MONTHLY: "#/components/schemas/MonthlyJobScheduleRequest"
-                      YEARLY: "#/components/schemas/YearlyJobScheduleRequest"
-                      CRON: "#/components/schemas/CronJobScheduleRequest"
+                  $ref: "#/components/schemas/BaseJob"
             application/xml:
               schema:
                 type: array
                 items:
-                  anyOf:
-                    - $ref: "#/components/schemas/RunOnceJobScheduleRequest"
-                    - $ref: "#/components/schemas/SecondsJobScheduleRequest"
-                    - $ref: "#/components/schemas/DailyJobScheduleRequest"
-                    - $ref: "#/components/schemas/CronJobScheduleRequest"
-                    - $ref: "#/components/schemas/WeeklyJobScheduleRequest"
-                    - $ref: "#/components/schemas/MonthlyJobScheduleRequest"
-                    - $ref: "#/components/schemas/YearlyJobScheduleRequest"
-                  discriminator:
-                    propertyName: uiPassParam
-                    mapping:
-                      RUN_ONCE: "#/components/schemas/RunOnceJobScheduleRequest"
-                      SECONDS: "#/components/schemas/SecondsJobScheduleRequest"
-                      DAILY: "#/components/schemas/DailyJobScheduleRequest"
-                      WEEKLY: "#/components/schemas/WeeklyJobScheduleRequest"
-                      MONTHLY: "#/components/schemas/MonthlyJobScheduleRequest"
-                      YEARLY: "#/components/schemas/YearlyJobScheduleRequest"
-                      CRON: "#/components/schemas/CronJobScheduleRequest"
+                  $ref: "#/components/schemas/BaseJob"
         "500":
           description: Error while retrieving blockout jobs
     post:
       summary: Creates a new blockout for scheduled jobs
+      operationId: createBlockoutJob
       tags:
         - i-scheduler
       requestBody:
@@ -540,24 +415,10 @@ paths:
         content:
           application/xml:
             schema:
-              anyOf:
-                - $ref: "#/components/schemas/RunOnceJobScheduleRequest"
-                - $ref: "#/components/schemas/SecondsJobScheduleRequest"
-                - $ref: "#/components/schemas/DailyJobScheduleRequest"
-                - $ref: "#/components/schemas/CronJobScheduleRequest"
-                - $ref: "#/components/schemas/WeeklyJobScheduleRequest"
-                - $ref: "#/components/schemas/MonthlyJobScheduleRequest"
-                - $ref: "#/components/schemas/YearlyJobScheduleRequest"
+              $ref: "#/components/schemas/BaseJob"
           application/json:
             schema:
-              anyOf:
-                - $ref: "#/components/schemas/RunOnceJobScheduleRequest"
-                - $ref: "#/components/schemas/SecondsJobScheduleRequest"
-                - $ref: "#/components/schemas/DailyJobScheduleRequest"
-                - $ref: "#/components/schemas/CronJobScheduleRequest"
-                - $ref: "#/components/schemas/WeeklyJobScheduleRequest"
-                - $ref: "#/components/schemas/MonthlyJobScheduleRequest"
-                - $ref: "#/components/schemas/YearlyJobScheduleRequest"
+              $ref: "#/components/schemas/BaseJob"
       responses:
         "200":
           description: Blockout created
@@ -569,6 +430,7 @@ paths:
   /api/v1/scheduler/blockouts/exists:
     get:
       summary: Checks if there are blockouts in the system
+      operationId: blockoutsExist
       tags:
         - i-scheduler
       responses:
@@ -580,6 +442,7 @@ paths:
   /api/v1/scheduler/blockouts/will-fire:
     post:
       summary: Checks if the selected blockout schedule will be fired
+      operationId: willBlockoutFire
       tags:
         - i-scheduler
       requestBody:
@@ -587,24 +450,10 @@ paths:
         content:
           application/xml:
             schema:
-              anyOf:
-                - $ref: "#/components/schemas/RunOnceJobScheduleRequest"
-                - $ref: "#/components/schemas/SecondsJobScheduleRequest"
-                - $ref: "#/components/schemas/DailyJobScheduleRequest"
-                - $ref: "#/components/schemas/CronJobScheduleRequest"
-                - $ref: "#/components/schemas/WeeklyJobScheduleRequest"
-                - $ref: "#/components/schemas/MonthlyJobScheduleRequest"
-                - $ref: "#/components/schemas/YearlyJobScheduleRequest"
+              $ref: "#/components/schemas/BaseJob"
           application/json:
             schema:
-              anyOf:
-                - $ref: "#/components/schemas/RunOnceJobScheduleRequest"
-                - $ref: "#/components/schemas/SecondsJobScheduleRequest"
-                - $ref: "#/components/schemas/DailyJobScheduleRequest"
-                - $ref: "#/components/schemas/CronJobScheduleRequest"
-                - $ref: "#/components/schemas/WeeklyJobScheduleRequest"
-                - $ref: "#/components/schemas/MonthlyJobScheduleRequest"
-                - $ref: "#/components/schemas/YearlyJobScheduleRequest"
+              $ref: "#/components/schemas/BaseJob"
       responses:
         "200":
           description: Will fire status
@@ -616,6 +465,7 @@ paths:
   /api/v1/scheduler/blockouts/should-fire-now:
     get:
       summary: Checks if the selected blockout schedule should be fired now
+      operationId: shouldBlockoutFireNow
       tags:
         - i-scheduler
       responses:
@@ -627,6 +477,7 @@ paths:
   /api/v1/scheduler/blockouts/status:
     post:
       summary: Check the status of the selected blockout schedule
+      operationId: getBlockoutStatus
       tags:
         - i-scheduler
       requestBody:
@@ -634,24 +485,10 @@ paths:
         content:
           application/xml:
             schema:
-              anyOf:
-                - $ref: "#/components/schemas/RunOnceJobScheduleRequest"
-                - $ref: "#/components/schemas/SecondsJobScheduleRequest"
-                - $ref: "#/components/schemas/DailyJobScheduleRequest"
-                - $ref: "#/components/schemas/CronJobScheduleRequest"
-                - $ref: "#/components/schemas/WeeklyJobScheduleRequest"
-                - $ref: "#/components/schemas/MonthlyJobScheduleRequest"
-                - $ref: "#/components/schemas/YearlyJobScheduleRequest"
+              $ref: "#/components/schemas/BaseJob"
           application/json:
             schema:
-              anyOf:
-                - $ref: "#/components/schemas/RunOnceJobScheduleRequest"
-                - $ref: "#/components/schemas/SecondsJobScheduleRequest"
-                - $ref: "#/components/schemas/DailyJobScheduleRequest"
-                - $ref: "#/components/schemas/CronJobScheduleRequest"
-                - $ref: "#/components/schemas/WeeklyJobScheduleRequest"
-                - $ref: "#/components/schemas/MonthlyJobScheduleRequest"
-                - $ref: "#/components/schemas/YearlyJobScheduleRequest"
+              $ref: "#/components/schemas/BaseJob"
       responses:
         "200":
           description: Blockout status
@@ -684,8 +521,16 @@ components:
 
     BaseJob:
       type: object
-      required:
-        - uiPassParam
+      discriminator:
+        propertyName: uiPassParam
+        mapping:
+          RUN_ONCE: "#/components/schemas/RunOnceJobScheduleRequest"
+          SECONDS: "#/components/schemas/SecondsJobScheduleRequest"
+          DAILY: "#/components/schemas/DailyJobScheduleRequest"
+          WEEKLY: "#/components/schemas/WeeklyJobScheduleRequest"
+          MONTHLY: "#/components/schemas/MonthlyJobScheduleRequest"
+          YEARLY: "#/components/schemas/YearlyJobScheduleRequest"
+          CRON: "#/components/schemas/CronJobScheduleRequest"
       properties:
         jobId:
           type: string
