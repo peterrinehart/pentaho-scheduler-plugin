@@ -598,6 +598,10 @@ components:
       properties:
         repeatInterval:
           type: integer
+        endDate:
+          type: string
+          format: date-time
+          nullable: true
 
     DailyJobScheduleRequest:
       allOf:

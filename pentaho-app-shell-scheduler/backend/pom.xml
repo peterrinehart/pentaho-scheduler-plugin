@@ -54,6 +54,17 @@
     </dependency>
     <dependency>
       <groupId>pentaho</groupId>
+      <artifactId>pentaho-scheduler-core</artifactId>
+      <version>${pentaho.version}</version>
+      <exclusions>
+        <exclusion>
+          <artifactId>*</artifactId>
+          <groupId>*</groupId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>pentaho</groupId>
       <artifactId>pentaho-platform-api</artifactId>
       <version>${pentaho.version}</version>
       <exclusions>
@@ -127,6 +138,16 @@
     <dependency>
       <groupId>javax.ws.rs</groupId>
       <artifactId>jsr311-api</artifactId>
+      <exclusions>
+        <exclusion>
+          <artifactId>*</artifactId>
+          <groupId>*</groupId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
       <exclusions>
         <exclusion>
           <artifactId>*</artifactId>
@@ -249,14 +270,6 @@
               <inputSpec>pas-scheduler-api.yaml</inputSpec>
               <apiPackage>com.pentaho.appshell.scheduler.api</apiPackage>
               <modelPackage>com.pentaho.appshell.scheduler.model</modelPackage>
-              <openapiNormalizer>REF_AS_PARENT_IN_ALLOF=true</openapiNormalizer>
-<!--              <schemaMappings>-->
-<!--                ErrorBase=com.pentaho.problemdetails.ErrorBase,-->
-<!--                Problem=com.pentaho.problemdetails.Problem,-->
-<!--                InputValidationProblem=com.pentaho.problemdetails.problems.InputValidationProblem,-->
-<!--                InputValidationIssue=com.pentaho.problemdetails.problems.issues.InputValidationIssue,-->
-<!--                Input=com.pentaho.problemdetails.problems.issues.Input-->
-<!--              </schemaMappings>-->
             </configuration>
           </execution>
         </executions>
