@@ -1,6 +1,5 @@
 package com.pentaho.appshell.scheduler;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -12,12 +11,10 @@ import org.pentaho.platform.web.http.api.resources.ComplexJobTriggerProxy;
 import org.pentaho.platform.web.http.api.resources.JobScheduleParam;
 import org.pentaho.platform.web.http.api.resources.JobScheduleRequest;
 import org.pentaho.gwt.widgets.client.utils.TimeUtil;
-import org.pentaho.gwt.widgets.client.utils.TimeUtil.DayOfWeek;
 import org.pentaho.platform.api.scheduler2.ComplexJobTrigger;
 import org.pentaho.platform.api.scheduler2.IJobScheduleParam;
 import org.pentaho.platform.api.scheduler2.JobTrigger;
 
-import com.fasterxml.jackson.databind.JsonSerializable.Base;
 import com.pentaho.appshell.scheduler.model.BaseJob;
 import com.pentaho.appshell.scheduler.model.CronJobScheduleRequest;
 import com.pentaho.appshell.scheduler.model.DailyJobScheduleRequest;
@@ -26,7 +23,6 @@ import com.pentaho.appshell.scheduler.model.MonthlyJobScheduleRequest;
 import com.pentaho.appshell.scheduler.model.RunOnceJobScheduleRequest;
 import com.pentaho.appshell.scheduler.model.SecondsJobScheduleRequest;
 import com.pentaho.appshell.scheduler.model.WeeklyJobScheduleRequest;
-import com.pentaho.appshell.scheduler.model.WeeklyJobScheduleRequest.DaysOfWeekEnum;
 import com.pentaho.appshell.scheduler.model.YearlyJobScheduleRequest;
 
 public class JobScheduleRequestBuilder {
