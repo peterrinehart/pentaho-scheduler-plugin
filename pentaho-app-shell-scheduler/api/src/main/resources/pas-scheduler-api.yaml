@@ -645,14 +645,14 @@ components:
           type: array
           items:
             type: string
-            enum:
-              - Sunday
-              - Monday
-              - Tuesday
-              - Wednesday
-              - Thursday
-              - Friday
-              - Saturday
+             enum:
+               - Sunday   # 0
+               - Monday   # 1
+               - Tuesday  # 2
+               - Wednesday # 3
+               - Thursday # 4
+               - Friday   # 5
+               - Saturday # 6
         endDate:
           type: string
           format: date-time
@@ -677,13 +677,13 @@ components:
         dayOfWeek:
           type: string
           enum:
-            - Sunday
-            - Monday
-            - Tuesday
-            - Wednesday
-            - Thursday
-            - Friday
-            - Saturday
+            - Sunday #0 
+            - Monday #1 
+            - Tuesday #2
+            - Wednesday #3
+            - Thursday #4
+            - Friday #5
+            - Saturday #6
         endDate:
           type: string
           format: date-time
@@ -702,21 +702,21 @@ components:
         weekOfMonth:
           type: string
           enum:
-            - first
-            - second
-            - third
-            - fourth
-            - last
+            - first # 0
+            - second # 1
+            - third # 2
+            - fourth # 3
+            - last # 4
         dayOfWeek:
           type: string
           enum:
-            - Sunday
-            - Monday
-            - Tuesday
-            - Wednesday
-            - Thursday
-            - Friday
-            - Saturday
+            - Sunday # 0
+            - Monday # 1
+            - Tuesday # 2
+            - Wednesday # 3
+            - Thursday # 4
+            - Friday # 5
+            - Saturday # 6
         endDate:
           type: string
           format: date-time
