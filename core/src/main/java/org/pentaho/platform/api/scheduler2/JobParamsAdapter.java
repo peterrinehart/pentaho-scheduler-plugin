@@ -62,6 +62,16 @@ public class JobParamsAdapter extends XmlAdapter<JobParams, Map<String, Object>>
               params.add( jobParam );
             }
           } );
+        } else if ( entry.getValue().getClass().isArray() ) {
+          Object[] array = (Object[]) entry.getValue();
+          for ( Object iValue : array ) {
+            if ( iValue != null ) {
+              JobParam jobParam = new JobParam();
+              jobParam.name = entry.getKey();
+              jobParam.value = iValue.toString();
+              params.add( jobParam );
+            }
+          }
         } else {
           JobParam jobParam = new JobParam();
           jobParam.name = entry.getKey();
